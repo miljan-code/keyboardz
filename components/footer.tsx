@@ -1,6 +1,5 @@
 import { siteConfig } from "@/config/site";
 import { Icons } from "@/components/icons";
-import { TestSettings } from "@/components/test/test-settings";
 
 export const Footer = () => {
   return (
@@ -13,7 +12,6 @@ export const Footer = () => {
           <span>&mdash;</span>
           <span className="font-medium">restart test</span>
         </div>
-        <TestSettings />
       </div>
       <div className="flex items-center justify-between">
         <a
