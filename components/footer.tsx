@@ -1,3 +1,4 @@
+import { siteConfig } from "@/config/site";
 import { Icons } from "@/components/icons";
 import { TestSettings } from "@/components/test/test-settings";
 
@@ -16,7 +17,7 @@ export const Footer = () => {
       </div>
       <div className="flex items-center justify-between">
         <a
-          href="https://github.com/miljan-code/keyboardz"
+          href={siteConfig.links.github}
           className="flex items-center gap-1 font-medium text-foreground/60 transition-colors hover:text-foreground/80 sm:text-sm"
           target="_blank"
         >
@@ -24,7 +25,7 @@ export const Footer = () => {
           <span>GitHub</span>
         </a>
         <a
-          href="https://github.com/miljan-code/keyboardz"
+          href={siteConfig.links.github}
           className="flex items-center gap-1 font-medium text-foreground/60 transition-colors hover:text-foreground/80 sm:text-sm"
           target="_blank"
         >

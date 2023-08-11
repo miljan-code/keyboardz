@@ -5,5 +5,11 @@ export type NavItem = {
 };
 
 export type SiteConfig = {
+  name: string;
+  description: string;
+  url: string;
+  links: {
+    github: string;
+  };
   nav: NavItem[];
 };

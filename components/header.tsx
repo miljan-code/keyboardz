@@ -9,7 +9,7 @@ export const Header = () => {
     <header className="flex justify-between md:grid md:grid-cols-[auto_1fr_auto] md:gap-10">
       <Link href="/" className="flex items-center gap-2">
         <Icons.logo className="-mt-0.5" />
-        <span className="font-bold">Keyboardz</span>
+        <span className="font-bold">{siteConfig.name}</span>
       </Link>
       <nav className="hidden gap-6 md:flex">
         {siteConfig.nav.map((navItem) => (
