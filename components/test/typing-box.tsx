@@ -1,39 +1,77 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { cn } from "@/lib/utils";
-import { Icons } from "../icons";
+import { cn, getElementPositionRelativeToParent } from "@/lib/utils";
+import { Icons } from "@/components/icons";
 
 interface TypingBoxProps {
   text: string;
 }
 
-const LINE_BREAK_HEIGHT = 40;
-
 export const TypingBox = ({ text }: TypingBoxProps) => {
   const [currentText, setCurrentText] = useState("");
-
   const [isInputFocused, setIsInputFocused] = useState(true);
-  // const [testFinished, setTestFinished] = useState(false);
-
-  const letters = text.split("");
-  const inputLetters = currentText.split("");
+  const [testFinished, setTestFinished] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const caretRef = useRef<HTMLDivElement>(null);
+
+  const router = useRouter();
+
+  const letters = text.split("");
+  const inputLetters = currentText.split("");
+
+  const resetCaret = () => {
+    if (!caretRef.current) return null;
+
+    caretRef.current.style.top = "0px";
+    caretRef.current.style.left = "0px";
+  };
+
+  const resetWrapperBox = () => {
+    if (!wrapperRef.current) return null;
+
+    wrapperRef.current.style.transform = `translateY(0px)`;
+  };
+
+  const resetTest = useCallback(() => {
+    setCurrentText("");
+    setTestFinished(false);
+    resetCaret();
+    resetWrapperBox();
+    router.refresh();
+  }, [router]);
+
+  useEffect(() => {
+    const handleResetTest = (e: KeyboardEvent) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        resetTest();
+      }
+    };
+
+    window.addEventListener("keydown", handleResetTest);
+
+    return () => window.removeEventListener("keydown", handleResetTest);
+  }, [router, resetTest]);
 
   const checkForNewLine = useCallback(() => {
-    const activeLetter = document.querySelector(".new-line");
+    const newLineLetter = document.querySelector(".new-line");
 
-    if (!activeLetter || !containerRef.current) return null;
+    if (!newLineLetter || !containerRef.current) return null;
 
-    const letterTopOffset = activeLetter.getBoundingClientRect().top;
+    const { offsetTop } = getElementPositionRelativeToParent(
+      newLineLetter,
+      containerRef.current,
+    );
 
-    const divTopOffset = containerRef.current.getBoundingClientRect().top;
+    const letterHeight = newLineLetter.getBoundingClientRect().height;
 
-    if (letterTopOffset - divTopOffset > LINE_BREAK_HEIGHT) {
+    if (offsetTop > letterHeight) {
       if (!wrapperRef.current) return null;
 
       const currentTranslateY = parseInt(
@@ -44,32 +82,58 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     }
   }, []);
 
-  const handleOnChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      // if (testFinished) return null;
+  const updateCaret = useCallback((isBackspace: boolean = false) => {
+    const newLineLetter = document.querySelector(".new-line");
 
-      const nextLetterToType = text[e.currentTarget.value.length - 1];
+    if (!newLineLetter || !wrapperRef.current) return null;
+
+    const { offsetLeft, offsetTop } = getElementPositionRelativeToParent(
+      newLineLetter,
+      wrapperRef.current,
+    );
+
+    if (!caretRef.current) return null;
+
+    caretRef.current.style.top = `${offsetTop}px`;
+
+    const letterWidth = newLineLetter.getBoundingClientRect().width;
+
+    if (isBackspace) {
+      caretRef.current.style.left = `${offsetLeft - letterWidth * 2}px`;
+    } else {
+      caretRef.current.style.left = `${offsetLeft}px`;
+    }
+  }, []);
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (testFinished) return null;
+
+      const inputLength = e.currentTarget.value.length;
+      const nextLetterToType = text[inputLength - 1];
       const currentLetter = e.currentTarget.value.at(-1);
 
-      if (nextLetterToType === " " && currentLetter !== " ") {
-        return null;
+      if (nextLetterToType === " ") {
+        if (currentLetter !== " ") return null;
+        if (currentLetter === " ") checkForNewLine();
       }
-      if (nextLetterToType === " " && currentLetter === " ") {
-        checkForNewLine();
-      }
+
+      if (currentText.length > inputLength) updateCaret(true);
+      else updateCaret();
 
       setCurrentText(e.currentTarget.value);
     },
-    [text, checkForNewLine],
+    [testFinished, text, checkForNewLine, updateCaret, currentText],
   );
+
+  const handleKeyDown = () => {
+    if (!currentText.length) resetCaret();
+  };
 
   const handleInputFocus = useCallback(
     (e: React.FocusEvent<HTMLInputElement, Element>) => {
-      if (e.type === "blur") {
-        setIsInputFocused(false);
-      } else if (e.type === "focus") {
-        setIsInputFocused(true);
-      }
+      if (e.type === "blur") setIsInputFocused(false);
+      else setIsInputFocused(true);
     },
     [],
   );
@@ -96,6 +160,10 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
               {letter}
             </span>
           ))}
+          <div
+            ref={caretRef}
+            className="absolute inset-0 h-8 w-[3px] rounded-md bg-primary/80"
+          />
         </div>
       </div>
       {!isInputFocused && (
@@ -109,7 +177,8 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
         ref={inputRef}
         className="absolute inset-0 cursor-default opacity-0"
         value={currentText}
-        onChange={handleOnChange}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
         onBlur={handleInputFocus}
         onFocus={handleInputFocus}
         onPaste={(e) => e.preventDefault()}
