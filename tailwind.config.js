@@ -20,6 +20,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        mono: ["var(--font-mono)", ...fontFamily.mono],
         heading: ["var(--font-heading)", ...fontFamily.sans],
       },
       colors: {
@@ -70,6 +71,9 @@ module.exports = {
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
+        },
+        pulse: {
+          "50%": { opacity: 0 },
         },
       },
       animation: {

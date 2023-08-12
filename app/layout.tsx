@@ -1,4 +1,4 @@
-import { Inter as FontSans } from "next/font/google";
+import { Roboto_Mono as FontMono, Inter as FontSans } from "next/font/google";
 import localFont from "next/font/local";
 
 import { cn } from "@/lib/utils";
@@ -11,6 +11,8 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 
 const fontSans = FontSans({ subsets: ["latin"], variable: "--font-sans" });
+
+const fontMono = FontMono({ subsets: ["latin"], variable: "--font-mono" });
 
 const fontHeading = localFont({
   src: "../assets/fonts/CalSans-SemiBold.woff2",
@@ -74,6 +76,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         className={cn(
           fontSans.variable,
           fontHeading.variable,
+          fontMono.variable,
           "dark font-sans antialiased",
         )}
       >
