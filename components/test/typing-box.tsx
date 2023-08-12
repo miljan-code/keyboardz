@@ -2,15 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTimer } from "@/hooks/use-timer";
 
 import { cn, getElementPositionRelativeToParent } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 
+import type { TestMode } from "@/types/test";
+
 interface TypingBoxProps {
   text: string;
+  isModalOpen: boolean;
+  testMode: TestMode;
 }
 
-export const TypingBox = ({ text }: TypingBoxProps) => {
+export const TypingBox = ({ text, isModalOpen, testMode }: TypingBoxProps) => {
   const [currentText, setCurrentText] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(true);
   const [testFinished, setTestFinished] = useState(false);
@@ -22,8 +27,11 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
   const router = useRouter();
 
+  const { startTimer, stopTimer, resetTimer, elapsedTime } = useTimer();
+
   const letters = text.split("");
   const inputLetters = currentText.split("");
+  const inputWords = currentText.split(" ");
 
   const resetCaret = () => {
     if (!caretRef.current) return null;
@@ -41,10 +49,11 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   const resetTest = useCallback(() => {
     setCurrentText("");
     setTestFinished(false);
+    stopTimer();
     resetCaret();
     resetWrapperBox();
     router.refresh();
-  }, [router]);
+  }, [router, stopTimer]);
 
   // Event listener for Tab key to reset the test
   useEffect(() => {
@@ -75,10 +84,12 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       if (!/^[a-zA-Z]$/.test(e.key)) return null;
     };
 
-    window.addEventListener("keydown", handleFocusOnKeystroke);
+    if (!isModalOpen) {
+      window.addEventListener("keydown", handleFocusOnKeystroke);
+    }
 
     return () => window.removeEventListener("keydown", handleFocusOnKeystroke);
-  }, []);
+  }, [isModalOpen]);
 
   const checkForNewLine = useCallback(() => {
     const newLineLetter = document.querySelector(".new-line");
@@ -178,7 +189,25 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
   return (
     <div className="relative">
-      <div ref={containerRef} className="h-[100px] overflow-hidden font-mono">
+      <div
+        className={cn(
+          "mb-2 flex items-center gap-2 text-lg font-medium text-primary transition-opacity",
+          {
+            "opacity-0": !currentText.length,
+          },
+        )}
+      >
+        {testMode.mode === "words" && (
+          <span>
+            {inputWords.length - 1}/{testMode.amount}
+          </span>
+        )}
+        <span>0</span>
+      </div>
+      <div
+        ref={containerRef}
+        className="relative h-[100px] overflow-hidden font-mono"
+      >
         <div
           ref={wrapperRef}
           className="-translate-y-0"
@@ -209,19 +238,19 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
             )}
           />
         </div>
-      </div>
-      <div
-        className={cn(
-          "absolute inset-0 -ml-2 flex items-center justify-center bg-transparent text-white backdrop-blur-sm transition-opacity",
-          {
-            "opacity-0": isInputFocused,
-            "delay-500": !isInputFocused,
-          },
-        )}
-      >
-        <span className="flex items-center gap-2 bg-background/50 p-2">
-          <Icons.pointer /> Click here or start typing to focus
-        </span>
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center bg-transparent text-white backdrop-blur-sm transition-opacity",
+            {
+              "opacity-0": isInputFocused,
+              "delay-500": !isInputFocused,
+            },
+          )}
+        >
+          <span className="flex items-center gap-2 bg-background/50 p-2">
+            <Icons.pointer /> Click here or start typing to focus
+          </span>
+        </div>
       </div>
       <input
         ref={inputRef}
