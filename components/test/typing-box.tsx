@@ -46,6 +46,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     router.refresh();
   }, [router]);
 
+  // Event listener for Tab key to reset the test
   useEffect(() => {
     const handleResetTest = (e: KeyboardEvent) => {
       if (e.key === "Tab") {
@@ -59,6 +60,26 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     return () => window.removeEventListener("keydown", handleResetTest);
   }, [router, resetTest]);
 
+  // Event listener for any keystroke to remove input blur
+  useEffect(() => {
+    const handleFocusOnKeystroke = (e: KeyboardEvent) => {
+      if (!inputRef.current) return null;
+
+      if (document.activeElement !== inputRef.current) {
+        e.preventDefault();
+        inputRef.current.focus();
+        setIsInputFocused(true);
+      }
+
+      // Will be useful for timer
+      if (!/^[a-zA-Z]$/.test(e.key)) return null;
+    };
+
+    window.addEventListener("keydown", handleFocusOnKeystroke);
+
+    return () => window.removeEventListener("keydown", handleFocusOnKeystroke);
+  }, []);
+
   const checkForNewLine = useCallback(() => {
     const newLineLetter = document.querySelector(".new-line");
 
@@ -71,6 +92,8 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
     const letterHeight = newLineLetter.getBoundingClientRect().height;
 
+    if (offsetTop < 0) resetWrapperBox();
+
     if (offsetTop > letterHeight) {
       if (!wrapperRef.current) return null;
 
@@ -82,7 +105,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     }
   }, []);
 
-  const updateCaret = useCallback((isBackspace: boolean = false) => {
+  const updateCaret = useCallback((type?: "backspace" | "resize") => {
     const newLineLetter = document.querySelector(".new-line");
 
     if (!newLineLetter || !wrapperRef.current) return null;
@@ -98,12 +121,26 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
     const letterWidth = newLineLetter.getBoundingClientRect().width;
 
-    if (isBackspace) {
+    if (type === "backspace") {
       caretRef.current.style.left = `${offsetLeft - letterWidth * 2}px`;
+    } else if (type === "resize") {
+      caretRef.current.style.left = `${offsetLeft - letterWidth}px`;
     } else {
       caretRef.current.style.left = `${offsetLeft}px`;
     }
   }, []);
+
+  useEffect(() => {
+    const handleCaretAndLineOnResize = () => {
+      checkForNewLine();
+      updateCaret("resize");
+    };
+
+    window.addEventListener("resize", handleCaretAndLineOnResize);
+
+    return () =>
+      window.removeEventListener("resize", handleCaretAndLineOnResize);
+  }, [checkForNewLine, updateCaret]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,7 +155,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
         if (currentLetter === " ") checkForNewLine();
       }
 
-      if (currentText.length > inputLength) updateCaret(true);
+      if (currentText.length > inputLength) updateCaret("backspace");
       else updateCaret();
 
       setCurrentText(e.currentTarget.value);
@@ -126,6 +163,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     [testFinished, text, checkForNewLine, updateCaret, currentText],
   );
 
+  // Fixes backspace bug, resets caret if input is empty
   const handleKeyDown = () => {
     if (!currentText.length) resetCaret();
   };
@@ -162,17 +200,29 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
           ))}
           <div
             ref={caretRef}
-            className="absolute inset-0 h-8 w-[3px] rounded-md bg-primary/80"
+            className={cn(
+              "absolute inset-0 h-8 w-[3px] rounded-md bg-primary/80",
+              {
+                "opacity-0 delay-500": !isInputFocused,
+                "animate-pulse": !currentText.length,
+              },
+            )}
           />
         </div>
       </div>
-      {!isInputFocused && (
-        <div className="absolute inset-0 -ml-2 flex items-center justify-center bg-transparent text-white backdrop-blur-sm">
-          <span className="flex items-center gap-2 bg-background/50 p-2">
-            <Icons.pointer /> Click here or start typing to focus
-          </span>
-        </div>
-      )}
+      <div
+        className={cn(
+          "absolute inset-0 -ml-2 flex items-center justify-center bg-transparent text-white backdrop-blur-sm transition-opacity",
+          {
+            "opacity-0": isInputFocused,
+            "delay-500": !isInputFocused,
+          },
+        )}
+      >
+        <span className="flex items-center gap-2 bg-background/50 p-2">
+          <Icons.pointer /> Click here or start typing to focus
+        </span>
+      </div>
       <input
         ref={inputRef}
         className="absolute inset-0 cursor-default opacity-0"
