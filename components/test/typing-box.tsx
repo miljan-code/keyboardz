@@ -15,11 +15,15 @@ interface TypingBoxProps {
   testMode: TestMode;
 }
 
+const MAX_WRONG_LETTERS = 8;
+
 export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
   const [currentText, setCurrentText] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(true);
   const [testFinished, setTestFinished] = useState(false);
   const [testStarted, setTestStarted] = useState(false);
+  const [letters, setLetters] = useState<string[]>([]);
+  const [addedLetters, setAddedLetters] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,9 +37,10 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
 
   const { isModalOpen } = useModal();
 
-  const letters = text.split("");
   const inputLetters = currentText.split("");
   const inputWords = currentText.split(" ");
+
+  useEffect(() => setLetters([...text.split(""), "_"]), [text]);
 
   const resetCaret = () => {
     if (!caretRef.current) return null;
@@ -143,28 +148,36 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     }
   }, []);
 
-  const updateCaret = useCallback((type?: "backspace" | "resize") => {
-    if (!newLineLetterRef.current || !wrapperRef.current) return null;
+  const updateCaret = useCallback(
+    (type?: "backspace" | "resize" | "space", distance: number = 0) => {
+      if (!newLineLetterRef.current || !wrapperRef.current) return null;
 
-    const { offsetLeft, offsetTop } = getElementPositionRelativeToParent(
-      newLineLetterRef.current,
-      wrapperRef.current,
-    );
+      const { offsetLeft, offsetTop } = getElementPositionRelativeToParent(
+        newLineLetterRef.current,
+        wrapperRef.current,
+      );
 
-    if (!caretRef.current) return null;
+      if (!caretRef.current) return null;
 
-    caretRef.current.style.top = `${offsetTop}px`;
+      caretRef.current.style.top = `${offsetTop}px`;
 
-    const letterWidth = newLineLetterRef.current.getBoundingClientRect().width;
+      const letterWidth =
+        newLineLetterRef.current.getBoundingClientRect().width;
 
-    if (type === "backspace") {
-      caretRef.current.style.left = `${offsetLeft - letterWidth * 2}px`;
-    } else if (type === "resize") {
-      caretRef.current.style.left = `${offsetLeft - letterWidth}px`;
-    } else {
-      caretRef.current.style.left = `${offsetLeft}px`;
-    }
-  }, []);
+      if (type === "backspace") {
+        caretRef.current.style.left = `${offsetLeft - letterWidth * 2}px`;
+      } else if (type === "resize") {
+        caretRef.current.style.left = `${offsetLeft - letterWidth}px`;
+      } else if (type === "space") {
+        caretRef.current.style.left = `${
+          offsetLeft + letterWidth * distance
+        }px`;
+      } else {
+        caretRef.current.style.left = `${offsetLeft}px`;
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     const handleCaretAndLineOnResize = () => {
@@ -213,12 +226,43 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
       if (testFinished) return null;
 
       const inputLength = e.currentTarget.value.length;
-      const nextLetterToType = text[inputLength - 1];
+      const nextLetterToType = letters[inputLength - 1];
       const currentLetter = e.currentTarget.value.at(-1);
 
-      if (nextLetterToType === " ") {
-        if (currentLetter !== " ") return null;
-        if (currentLetter === " ") checkForNewLine();
+      if (currentLetter === " ") {
+        if (nextLetterToType === " ") {
+          checkForNewLine();
+          setAddedLetters(0);
+        } else {
+          e.preventDefault();
+          const isStart = !currentText.length;
+          const isNewWord = currentText.at(-1) === " ";
+
+          if (isStart || isNewWord) return null;
+
+          const startingIndex = currentText.length - 1;
+          let distance = 0;
+          for (let i = startingIndex; i < letters.length; i++) {
+            if (letters[i] === " ") {
+              distance = i - startingIndex;
+              break;
+            }
+          }
+
+          const newText = currentText + "_".repeat(distance - 1) + " ";
+          setCurrentText(newText);
+          updateCaret("space", distance - 1);
+          return null;
+        }
+      }
+
+      if (nextLetterToType === " " && currentLetter !== " ") {
+        if (addedLetters > MAX_WRONG_LETTERS) return null;
+
+        const arr = [...letters];
+        arr.splice(inputLength - 1, 0, currentLetter?.toUpperCase() || "_");
+        setLetters(arr);
+        setAddedLetters((prev) => prev + 1);
       }
 
       if (currentText.length > inputLength) updateCaret("backspace");
@@ -226,7 +270,14 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
 
       setCurrentText(e.currentTarget.value);
     },
-    [testFinished, text, checkForNewLine, updateCaret, currentText],
+    [
+      testFinished,
+      checkForNewLine,
+      updateCaret,
+      currentText,
+      letters,
+      addedLetters,
+    ],
   );
 
   // Fixes backspace bug, resets caret if input is empty
@@ -272,7 +323,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
           className="ml-1 -translate-y-0"
           style={{ transform: "translateY(-0px)" }}
         >
-          {[...letters, "_"].map((letter, i) => (
+          {letters.map((letter, i) => (
             <span
               key={letter + i}
               ref={i === currentText.length + 1 ? newLineLetterRef : null}
@@ -285,7 +336,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
                 invisible: i === text.length,
               })}
             >
-              {letter}
+              {letter.toLowerCase()}
             </span>
           ))}
           <div
