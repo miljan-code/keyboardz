@@ -61,6 +61,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     setCurrentText("");
     setTestStarted(false);
     setTestFinished(false);
+    setAddedLetters(0);
     stopTimer();
     resetTimer(time);
     resetCaret();
@@ -212,13 +213,13 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
 
   const checkForEndTestWordsMode = useCallback(
     (input: string) => {
-      if (input.length === text.length && testMode.mode === "words") {
+      if (input.length === letters.length - 1 && testMode.mode === "words") {
         setCurrentText(input);
         handleEndTest();
         return null;
       }
     },
-    [testMode.mode, text.length, handleEndTest],
+    [testMode.mode, letters.length, handleEndTest],
   );
 
   const handleChange = useCallback(
@@ -257,6 +258,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
       }
 
       if (nextLetterToType === " " && currentLetter !== " ") {
+        console.log(addedLetters);
         if (addedLetters > MAX_WRONG_LETTERS) return null;
 
         const arr = [...letters];
@@ -333,7 +335,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
                 "text-red-500":
                   i <= currentText.length - 1 && inputLetters[i] !== letters[i],
                 "new-line": i === currentText.length + 1,
-                invisible: i === text.length,
+                invisible: i === letters.length - 1,
               })}
             >
               {letter.toLowerCase()}
