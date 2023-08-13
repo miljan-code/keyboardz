@@ -1,7 +1,9 @@
 import {
   Code,
   GitFork,
+  Languages,
   MousePointer,
+  Timer,
   UserCircle,
   type LucideProps,
 } from "lucide-react";
@@ -11,6 +13,8 @@ export const Icons = {
   code: Code,
   git: GitFork,
   pointer: MousePointer,
+  timer: Timer,
+  words: Languages,
   logo: ({ ...props }: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
