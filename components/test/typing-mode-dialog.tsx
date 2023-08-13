@@ -1,5 +1,6 @@
 "use client";
 
+import { useModal } from "@/hooks/use-modal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -30,18 +31,13 @@ import { Icons } from "../icons";
 import type { TestMode } from "@/types/test";
 
 interface TypingModeDialogProps {
-  isModalOpen: boolean;
   testMode: TestMode;
-  // eslint-disable-next-line
-  handleModal: (bool: boolean) => void;
   // eslint-disable-next-line
   handleModeChange: (mode: TestMode) => void;
 }
 
 export const TypingModeDialog = ({
-  isModalOpen,
   testMode,
-  handleModal,
   handleModeChange,
 }: TypingModeDialogProps) => {
   const form = useForm<TestMode>({
@@ -54,14 +50,19 @@ export const TypingModeDialog = ({
 
   const mode = form.watch("mode");
 
+  const { isModalOpen, setIsModalOpen } = useModal();
+
   const onSubmit = (values: TestMode) => {
-    handleModal(false);
+    setIsModalOpen(false);
     handleModeChange(values);
   };
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <Dialog open={isModalOpen} onOpenChange={(isOpen) => handleModal(isOpen)}>
+      <Dialog
+        open={isModalOpen}
+        onOpenChange={(isOpen) => setIsModalOpen(isOpen)}
+      >
         <DialogTrigger asChild>
           <Button variant="outline" size="sm">
             Typing Mode

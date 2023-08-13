@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { generateRandomText } from "@/lib/generate-text/generate-text";
+import { Loader } from "@/components/loader";
 import { TypingBox } from "@/components/test/typing-box";
 import { TypingModeDialog } from "@/components/test/typing-mode-dialog";
 
@@ -16,7 +17,6 @@ const initialTestMode: TestMode = {
 export const TypingTest = () => {
   const [isClient, setIsClient] = useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [testMode, setTestMode] = useState<TestMode>(initialTestMode);
 
   useEffect(() => setIsClient(true), []);
@@ -31,26 +31,18 @@ export const TypingTest = () => {
 
   return (
     <>
+      <div className="flex justify-center">
+        <TypingModeDialog
+          testMode={testMode}
+          handleModeChange={(mode: TestMode) => setTestMode(mode)}
+        />
+      </div>
       {isClient ? (
-        <>
-          <div className="flex justify-center">
-            <TypingModeDialog
-              isModalOpen={isModalOpen}
-              testMode={testMode}
-              handleModal={(bool: boolean) => setIsModalOpen(bool)}
-              handleModeChange={(mode: TestMode) => setTestMode(mode)}
-            />
-          </div>
-          <div className="-mt-12 flex h-full items-center justify-center">
-            <TypingBox
-              isModalOpen={isModalOpen}
-              testMode={testMode}
-              text={text}
-            />
-          </div>
-        </>
+        <div className="-mt-12 flex h-full items-center justify-center">
+          <TypingBox testMode={testMode} text={text} />
+        </div>
       ) : (
-        "Loading..."
+        <Loader />
       )}
     </>
   );
