@@ -9,12 +9,16 @@ const initialWpmStats = {
   liveWpm: 0,
   wpmHistory: [],
   accuracy: 0,
+  chars: {
+    correct: 0,
+    incorrect: 0,
+  },
 };
 
 const wpmStatsAtom = atom<WpmStats>(initialWpmStats);
 const calculateLiveAtom = atom(false);
 
-interface UseWPMProps {
+export interface UseWPMProps {
   text: string;
   testMode: TestMode;
   elapsedTime: number;
@@ -36,14 +40,21 @@ export const useWpm = ({ text, testMode, elapsedTime, input }: UseWPMProps) => {
 
     const wpm = Math.round(correctWords / (time / 60));
     const rawWpm = Math.round(inputWords.length / (time / 60));
-    const accuracy = calculateAccuracy({ inputWords, words }) || 0;
-    const wpmHistory = [...wpmStats.wpmHistory, wpm];
+    const wpmHistory = [...wpmStats.wpmHistory, { wpm, rawWpm }];
+    const { accuracy, correct, incorrect } = calculateAccuracy({
+      inputWords,
+      words,
+    });
 
     const stats = {
       wpm,
       rawWpm,
       accuracy,
       wpmHistory,
+      chars: {
+        correct,
+        incorrect,
+      },
     };
 
     setWpmStats({ ...wpmStats, ...stats });
@@ -54,12 +65,19 @@ export const useWpm = ({ text, testMode, elapsedTime, input }: UseWPMProps) => {
       testMode.mode === "timer" ? testMode.amount - elapsedTime : elapsedTime;
 
     let liveWpm = Math.round(correctWords / (time / 60));
+    let liveRawWpm = Math.round(inputWords.length / (time / 60));
 
     if (Number.isNaN(liveWpm) || !Number.isFinite(liveWpm)) {
       liveWpm = 0;
     }
+    if (Number.isNaN(liveRawWpm) || !Number.isFinite(liveRawWpm)) {
+      liveRawWpm = 0;
+    }
 
-    const wpmHistory = [...wpmStats.wpmHistory, liveWpm];
+    const wpmHistory = [
+      ...wpmStats.wpmHistory,
+      { wpm: liveWpm, rawWpm: liveRawWpm },
+    ];
 
     const stats = {
       liveWpm,
@@ -74,6 +92,7 @@ export const useWpm = ({ text, testMode, elapsedTime, input }: UseWPMProps) => {
     testMode.mode,
     setWpmStats,
     wpmStats,
+    inputWords.length,
   ]);
 
   const startMeasuring = () => {
@@ -92,7 +111,8 @@ export const useWpm = ({ text, testMode, elapsedTime, input }: UseWPMProps) => {
     const wpmHistory = [...wpmStats.wpmHistory];
 
     for (let i = 0; i < wpmHistory.length; i++) {
-      if (wpmHistory[i] === 0) wpmHistory.shift();
+      if (wpmHistory[i].wpm === 0 || wpmHistory[i].rawWpm === 0)
+        wpmHistory.shift();
       else break;
     }
 
@@ -146,7 +166,12 @@ function calculateAccuracy({ inputWords, words }: CalculateAccuracy) {
   let correctChars = 0;
   let incorrectChars = 0;
 
-  if (!inputWords.length || !words.length) return null;
+  if (!inputWords.length || !words.length)
+    return {
+      accuracy: 0,
+      correct: 0,
+      incorrect: 0,
+    };
 
   for (let i = 0; i < words.length; i++) {
     for (let j = 0; j < inputWords[i].length; j++) {
@@ -157,5 +182,9 @@ function calculateAccuracy({ inputWords, words }: CalculateAccuracy) {
 
   const accuracy = (correctChars / (correctChars + incorrectChars)) * 100;
 
-  return accuracy;
+  return {
+    accuracy: Math.round(accuracy),
+    correct: correctChars,
+    incorrect: incorrectChars,
+  };
 }

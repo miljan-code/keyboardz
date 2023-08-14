@@ -8,6 +8,7 @@ import { useWpm } from "@/hooks/use-wpm";
 
 import { cn, getElementPositionRelativeToParent } from "@/lib/utils";
 import { Icons } from "@/components/icons";
+import { TestResult } from "./test-result";
 
 import type { TestMode } from "@/types/test";
 
@@ -311,7 +312,9 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
       if (letter === " " || !letter) return null;
       if (letter !== letter.toUpperCase()) return null;
 
-      setLetters([...letters].splice(index, 1));
+      const arr = [...letters];
+      arr.splice(index, 1);
+      setLetters(arr);
       setAddedLetters((prev) => prev - 1);
     }
 
@@ -345,6 +348,14 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     },
     [],
   );
+
+  if (testFinished) {
+    return (
+      <TestResult
+        wpmInput={{ testMode, text, elapsedTime, input: currentText }}
+      />
+    );
+  }
 
   return (
     <div className="relative">
