@@ -300,11 +300,41 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
   );
 
   // Fixes backspace bug, resets caret if input is empty
-  const handleKeyDown = () => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!testStarted) return null;
     if (!currentText.length) resetCaret();
+
+    const index = e.currentTarget.value.length - 1;
+    if (e.key === "Backspace") {
+      const letter = letters[index];
+
+      if (letter === " " || !letter) return null;
+      if (letter !== letter.toUpperCase()) return null;
+
+      setLetters([...letters].splice(index, 1));
+      setAddedLetters((prev) => prev - 1);
+    }
+
+    if (e.key === "Backspace" && e.ctrlKey) {
+      const arr = [...letters];
+      for (let i = index; i >= 0; i--) {
+        if (letters[i] === " ") break;
+        else if (letters[i] === letters[i].toUpperCase()) {
+          arr.splice(i, 1);
+        } else break;
+      }
+
+      setAddedLetters(0);
+      setLetters(arr);
+      updateCaret();
+    }
   };
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && e.ctrlKey) {
+      updateCaret("resize");
+    }
+
     checkForEndTestWordsMode(e.currentTarget.value);
   };
 
