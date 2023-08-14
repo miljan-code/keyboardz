@@ -36,7 +36,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
 
   const { startTimer, stopTimer, resetTimer, elapsedTime } = useTimer();
 
-  const { calculateWPM, liveCalculation, liveWpm, wpm, rawWpm } = useWpm({
+  const { calculateWPM, startMeasuring, stopMeasuring, wpmStats } = useWpm({
     testMode,
     text,
     elapsedTime,
@@ -74,7 +74,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     resetTimer(time);
     resetCaret();
     resetWrapperBox();
-    liveCalculation(false);
+    stopMeasuring();
     router.refresh();
   }, [
     router,
@@ -82,7 +82,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     resetTimer,
     testMode.amount,
     testMode.mode,
-    liveCalculation,
+    stopMeasuring,
   ]);
 
   // Event listener for Tab key to reset the test
@@ -115,7 +115,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
 
       if (!testStarted && !testFinished) {
         setTestStarted(true);
-        liveCalculation(true);
+        startMeasuring();
         if (testMode.mode === "timer") {
           startTimer(testMode.amount, true);
         } else {
@@ -136,7 +136,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     testMode.amount,
     testMode.mode,
     testStarted,
-    liveCalculation,
+    startMeasuring,
   ]);
 
   // resets test when mode is changed
@@ -212,16 +212,16 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
 
   const handleEndTest = useCallback(() => {
     stopTimer();
+    stopMeasuring();
     calculateWPM();
 
     setTestFinished(true);
     setTestStarted(false);
-    liveCalculation(false);
 
     // check if authed - save to db
 
     // show result
-  }, [stopTimer, calculateWPM, liveCalculation]);
+  }, [stopTimer, calculateWPM, stopMeasuring]);
 
   useEffect(() => {
     if (testMode.mode === "words") return;
@@ -332,7 +332,6 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
           </span>
         )}
         <span>{elapsedTime}</span>
-        <span>Live WPM: {liveWpm}</span>
       </div>
       <div
         ref={containerRef}
