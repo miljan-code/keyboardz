@@ -8,6 +8,13 @@ export interface WpmStats {
   wpm: number;
   rawWpm: number;
   liveWpm: number;
-  wpmHistory: number[];
+  wpmHistory: {
+    wpm: number;
+    rawWpm: number;
+  }[];
   accuracy: number;
+  chars: {
+    correct: number;
+    incorrect: number;
+  };
 }
