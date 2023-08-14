@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useModal } from "@/hooks/use-modal";
 import { useTimer } from "@/hooks/use-timer";
+import { useWpm } from "@/hooks/use-wpm";
 
 import { cn, getElementPositionRelativeToParent } from "@/lib/utils";
 import { Icons } from "@/components/icons";
@@ -34,6 +35,13 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
   const router = useRouter();
 
   const { startTimer, stopTimer, resetTimer, elapsedTime } = useTimer();
+
+  const { calculateWPM, startMeasuring, stopMeasuring, wpmStats } = useWpm({
+    testMode,
+    text,
+    elapsedTime,
+    input: currentText,
+  });
 
   const { isModalOpen } = useModal();
 
@@ -66,8 +74,16 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     resetTimer(time);
     resetCaret();
     resetWrapperBox();
+    stopMeasuring();
     router.refresh();
-  }, [router, stopTimer, resetTimer, testMode.amount, testMode.mode]);
+  }, [
+    router,
+    stopTimer,
+    resetTimer,
+    testMode.amount,
+    testMode.mode,
+    stopMeasuring,
+  ]);
 
   // Event listener for Tab key to reset the test
   useEffect(() => {
@@ -99,6 +115,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
 
       if (!testStarted && !testFinished) {
         setTestStarted(true);
+        startMeasuring();
         if (testMode.mode === "timer") {
           startTimer(testMode.amount, true);
         } else {
@@ -119,6 +136,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     testMode.amount,
     testMode.mode,
     testStarted,
+    startMeasuring,
   ]);
 
   // resets test when mode is changed
@@ -194,16 +212,16 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
 
   const handleEndTest = useCallback(() => {
     stopTimer();
+    stopMeasuring();
+    calculateWPM();
 
     setTestFinished(true);
     setTestStarted(false);
 
-    // calculate WPM
-
     // check if authed - save to db
 
     // show result
-  }, [stopTimer]);
+  }, [stopTimer, calculateWPM, stopMeasuring]);
 
   useEffect(() => {
     if (testMode.mode === "words") return;
@@ -258,7 +276,6 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
       }
 
       if (nextLetterToType === " " && currentLetter !== " ") {
-        console.log(addedLetters);
         if (addedLetters > MAX_WRONG_LETTERS) return null;
 
         const arr = [...letters];
@@ -347,7 +364,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
               "absolute inset-0 h-8 w-[3px] rounded-md bg-primary/80",
               {
                 "opacity-0 delay-500": !isInputFocused,
-                "animate-pulse": !currentText.length,
+                "animate-pulse": !currentText.length && isInputFocused,
               },
             )}
           />
