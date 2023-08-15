@@ -1,3 +1,11 @@
+import type { EnvSchema } from "@/lib/env";
+
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv extends EnvSchema {}
+  }
+}
+
 export type NavItem = {
   title: string;
   href: string;
