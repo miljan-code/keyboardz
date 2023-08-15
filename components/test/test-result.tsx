@@ -1,7 +1,10 @@
 "use client";
 
+import { useTimer } from "@/hooks/use-timer";
 import { useWpm, type UseWPMProps } from "@/hooks/use-wpm";
+import { useAtom } from "jotai";
 
+import { testModeAtom } from "@/components/test/typing-mode-dialog";
 import WpmChart from "@/components/test/wpm-chart";
 
 interface TestResultProps {
@@ -9,7 +12,10 @@ interface TestResultProps {
 }
 
 export const TestResult = ({ wpmInput }: TestResultProps) => {
-  const { wpmStats } = useWpm(wpmInput);
+  const [testMode] = useAtom(testModeAtom);
+
+  const { wpmStats, wpmHistory } = useWpm(wpmInput);
+  const { elapsedTime } = useTimer();
 
   return (
     <section className="w-full space-y-4">
@@ -28,13 +34,13 @@ export const TestResult = ({ wpmInput }: TestResultProps) => {
             </span>
           </div>
         </div>
-        <WpmChart data={wpmStats.wpmHistory} />
+        <WpmChart data={wpmHistory} />
       </div>
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
         <div className="flex flex-col items-center md:items-start">
           <span className="text-foreground/60">test type</span>
           <span className="text-2xl font-medium text-primary">
-            {wpmInput.testMode.mode} {wpmInput.testMode.amount}
+            {testMode.mode} {testMode.amount}
           </span>
         </div>
         <div className="flex flex-col items-center md:items-start">
@@ -52,10 +58,7 @@ export const TestResult = ({ wpmInput }: TestResultProps) => {
         <div className="flex flex-col items-center md:items-start">
           <span className="text-foreground/60">time</span>
           <span className="text-2xl font-medium text-primary">
-            {wpmInput.testMode.mode === "timer"
-              ? wpmInput.testMode.amount
-              : wpmInput.elapsedTime}
-            s
+            {testMode.mode === "timer" ? testMode.amount : elapsedTime}s
           </span>
         </div>
       </div>

@@ -5,27 +5,30 @@ import { useRouter } from "next/navigation";
 import { useModal } from "@/hooks/use-modal";
 import { useTimer } from "@/hooks/use-timer";
 import { useWpm } from "@/hooks/use-wpm";
+import { atom, useAtom } from "jotai";
 
 import { cn, getElementPositionRelativeToParent } from "@/lib/utils";
 import { Icons } from "@/components/icons";
+import { testModeAtom } from "@/components/test/typing-mode-dialog";
 import { TestResult } from "./test-result";
-
-import type { TestMode } from "@/types/test";
 
 interface TypingBoxProps {
   text: string;
-  testMode: TestMode;
 }
 
 const MAX_WRONG_LETTERS = 8;
 
-export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
-  const [currentText, setCurrentText] = useState("");
+export const currentTextAtom = atom("");
+
+export const TypingBox = ({ text }: TypingBoxProps) => {
   const [isInputFocused, setIsInputFocused] = useState(true);
   const [testFinished, setTestFinished] = useState(false);
   const [testStarted, setTestStarted] = useState(false);
   const [letters, setLetters] = useState<string[]>([]);
   const [addedLetters, setAddedLetters] = useState(0);
+
+  const [currentText, setCurrentText] = useAtom(currentTextAtom);
+  const [testMode] = useAtom(testModeAtom);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,12 +40,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
 
   const { startTimer, stopTimer, resetTimer, elapsedTime } = useTimer();
 
-  const { calculateWPM, startMeasuring, stopMeasuring } = useWpm({
-    testMode,
-    text,
-    elapsedTime,
-    input: currentText,
-  });
+  const { startMeasuring, stopMeasuring } = useWpm({ text });
 
   const { isModalOpen } = useModal();
 
@@ -84,6 +82,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     testMode.amount,
     testMode.mode,
     stopMeasuring,
+    setCurrentText,
   ]);
 
   // Event listener for Tab key to reset the test
@@ -213,7 +212,6 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
   const handleEndTest = useCallback(() => {
     stopTimer();
     stopMeasuring();
-    calculateWPM();
 
     setTestFinished(true);
     setTestStarted(false);
@@ -221,7 +219,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     // check if authed - save to db
 
     // show result
-  }, [stopTimer, calculateWPM, stopMeasuring]);
+  }, [stopTimer, stopMeasuring]);
 
   useEffect(() => {
     if (testMode.mode === "words") return;
@@ -237,7 +235,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
         return null;
       }
     },
-    [testMode.mode, letters.length, handleEndTest],
+    [testMode.mode, letters.length, handleEndTest, setCurrentText],
   );
 
   const handleChange = useCallback(
@@ -296,6 +294,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
       currentText,
       letters,
       addedLetters,
+      setCurrentText,
     ],
   );
 
@@ -327,7 +326,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
     if (e.key === "Backspace" && e.ctrlKey) {
       const arr = [...letters];
       for (let i = index; i >= 0; i--) {
-        if (letters[i] === " ") break;
+        if (letters[i] === " ") null;
         else if (letters[i] === letters[i].toUpperCase()) {
           arr.splice(i, 1);
         } else break;
@@ -356,11 +355,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
   );
 
   if (testFinished) {
-    return (
-      <TestResult
-        wpmInput={{ testMode, text, elapsedTime, input: currentText }}
-      />
-    );
+    return <TestResult wpmInput={{ text }} />;
   }
 
   return (

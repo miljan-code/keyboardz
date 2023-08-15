@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { atom, useAtom } from "jotai";
+
+const timeAtom = atom(0);
 
 export const useTimer = () => {
-  const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [countdown, setCountdown] = useState(false);
+
+  const [time, setTime] = useAtom(timeAtom);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -20,7 +24,7 @@ export const useTimer = () => {
       }, 1000);
     }
     return () => clearInterval(intervalId);
-  }, [isRunning, time, countdown]);
+  }, [isRunning, time, setTime, countdown]);
 
   const elapsedTime = Math.floor(time % 6000);
 
