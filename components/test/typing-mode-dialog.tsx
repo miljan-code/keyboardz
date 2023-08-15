@@ -2,9 +2,11 @@
 
 import { useModal } from "@/hooks/use-modal";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { atom, useAtom } from "jotai";
 import { useForm } from "react-hook-form";
 
 import { testModeFormSchema } from "@/lib/validations/test-mode-schema";
+import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,20 +28,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Icons } from "../icons";
 
 import type { TestMode } from "@/types/test";
 
-interface TypingModeDialogProps {
-  testMode: TestMode;
-  // eslint-disable-next-line
-  handleModeChange: (mode: TestMode) => void;
-}
+export const testModeAtom = atom<TestMode>({
+  mode: "timer",
+  amount: 60,
+});
 
-export const TypingModeDialog = ({
-  testMode,
-  handleModeChange,
-}: TypingModeDialogProps) => {
+export const TypingModeDialog = () => {
+  const [testMode, setTestMode] = useAtom(testModeAtom);
+
   const form = useForm<TestMode>({
     resolver: zodResolver(testModeFormSchema),
     defaultValues: {
@@ -54,7 +53,7 @@ export const TypingModeDialog = ({
 
   const onSubmit = (values: TestMode) => {
     setIsModalOpen(false);
-    handleModeChange(values);
+    setTestMode(values);
   };
 
   return (

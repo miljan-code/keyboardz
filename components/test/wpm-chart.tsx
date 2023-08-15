@@ -2,15 +2,15 @@
 
 import { AreaChart, Grid } from "@tremor/react";
 
-import type { WpmStats } from "@/types/test";
+import type { WpmHistory } from "@/types/test";
 
 interface WpmChartProps {
-  data: WpmStats["wpmHistory"];
+  data: WpmHistory[];
 }
 
 export default function WpmChart({ data }: WpmChartProps) {
   const wpmHistory = data.map((item, i) => ({
-    index: i,
+    index: i + 1,
     wpm: item.wpm,
     raw: item.rawWpm,
   }));

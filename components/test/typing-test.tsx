@@ -1,23 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
 
 import { generateRandomText } from "@/lib/generate-text/generate-text";
 import { Loader } from "@/components/loader";
 import { TypingBox } from "@/components/test/typing-box";
-import { TypingModeDialog } from "@/components/test/typing-mode-dialog";
-
-import type { TestMode } from "@/types/test";
-
-const initialTestMode: TestMode = {
-  mode: "timer",
-  amount: 60,
-};
+import {
+  testModeAtom,
+  TypingModeDialog,
+} from "@/components/test/typing-mode-dialog";
 
 export const TypingTest = () => {
   const [isClient, setIsClient] = useState(false);
 
-  const [testMode, setTestMode] = useState<TestMode>(initialTestMode);
+  const [testMode] = useAtom(testModeAtom);
 
   useEffect(() => setIsClient(true), []);
 
@@ -32,14 +29,11 @@ export const TypingTest = () => {
   return (
     <>
       <div className="flex justify-center">
-        <TypingModeDialog
-          testMode={testMode}
-          handleModeChange={(mode: TestMode) => setTestMode(mode)}
-        />
+        <TypingModeDialog />
       </div>
       {isClient ? (
         <div className="-mt-12 flex h-full items-center justify-center">
-          <TypingBox testMode={testMode} text={text} />
+          <TypingBox text={text} />
         </div>
       ) : (
         <Loader />

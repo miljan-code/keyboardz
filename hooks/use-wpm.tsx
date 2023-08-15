@@ -1,13 +1,16 @@
-import { useCallback, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { atom, useAtom } from "jotai";
 
-import type { TestMode, WpmStats } from "@/types/test";
+import { currentTextAtom } from "@/components/test/typing-box";
+import { testModeAtom } from "@/components/test/typing-mode-dialog";
+import { useTimer } from "./use-timer";
+
+import type { TestMode, WpmHistory, WpmStats } from "@/types/test";
 
 const initialWpmStats = {
   wpm: 0,
   rawWpm: 0,
   liveWpm: 0,
-  wpmHistory: [],
   accuracy: 0,
   chars: {
     correct: 0,
@@ -16,18 +19,21 @@ const initialWpmStats = {
 };
 
 const wpmStatsAtom = atom<WpmStats>(initialWpmStats);
-const calculateLiveAtom = atom(false);
+const wpmHistoryAtom = atom<WpmHistory[]>([]);
 
 export interface UseWPMProps {
   text: string;
-  testMode: TestMode;
-  elapsedTime: number;
-  input: string;
 }
 
-export const useWpm = ({ text, testMode, elapsedTime, input }: UseWPMProps) => {
+export const useWpm = ({ text }: UseWPMProps) => {
   const [wpmStats, setWpmStats] = useAtom(wpmStatsAtom);
-  const [calculateLive, setCalculateLive] = useAtom(calculateLiveAtom);
+  const [wpmHistory, setWpmHistory] = useAtom(wpmHistoryAtom);
+  const [testMode] = useAtom(testModeAtom);
+  const [input] = useAtom(currentTextAtom);
+
+  const { elapsedTime } = useTimer();
+
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { correctWords, inputWords, words } = transformWords({
     input,
@@ -35,12 +41,21 @@ export const useWpm = ({ text, testMode, elapsedTime, input }: UseWPMProps) => {
     testMode,
   });
 
+  const elapsedTimeRef = useRef<number>(elapsedTime);
+  const correctWordsRef = useRef<number>(correctWords);
+  const inputWordsRef = useRef<string[]>(inputWords);
+
+  useEffect(() => {
+    elapsedTimeRef.current = elapsedTime;
+    correctWordsRef.current = correctWords;
+    inputWordsRef.current = inputWords;
+  }, [correctWords, elapsedTime, inputWords]);
+
   const calculateWPM = () => {
     const time = testMode.mode === "timer" ? testMode.amount : elapsedTime;
 
     const wpm = Math.round(correctWords / (time / 60));
     const rawWpm = Math.round(inputWords.length / (time / 60));
-    const wpmHistory = [...wpmStats.wpmHistory, { wpm, rawWpm }];
     const { accuracy, correct, incorrect } = calculateAccuracy({
       inputWords,
       words,
@@ -50,7 +65,6 @@ export const useWpm = ({ text, testMode, elapsedTime, input }: UseWPMProps) => {
       wpm,
       rawWpm,
       accuracy,
-      wpmHistory,
       chars: {
         correct,
         incorrect,
@@ -60,7 +74,11 @@ export const useWpm = ({ text, testMode, elapsedTime, input }: UseWPMProps) => {
     setWpmStats({ ...wpmStats, ...stats });
   };
 
-  const calculateLiveWPM = useCallback(() => {
+  const calculateLiveWPM = () => {
+    const correctWords = correctWordsRef.current;
+    const inputWords = inputWordsRef.current;
+    const elapsedTime = elapsedTimeRef.current;
+
     const time =
       testMode.mode === "timer" ? testMode.amount - elapsedTime : elapsedTime;
 
@@ -74,75 +92,46 @@ export const useWpm = ({ text, testMode, elapsedTime, input }: UseWPMProps) => {
       liveRawWpm = 0;
     }
 
-    const wpmHistory = [
-      ...wpmStats.wpmHistory,
-      { wpm: liveWpm, rawWpm: liveRawWpm },
-    ];
-
-    const stats = {
-      liveWpm,
-      wpmHistory,
-    };
-
-    setWpmStats({ ...wpmStats, ...stats });
-  }, [
-    correctWords,
-    elapsedTime,
-    testMode.amount,
-    testMode.mode,
-    setWpmStats,
-    wpmStats,
-    inputWords.length,
-  ]);
+    setWpmHistory((prev) => [...prev, { wpm: liveRawWpm, rawWpm: liveWpm }]);
+  };
 
   const startMeasuring = () => {
-    const stats = {
-      liveWpm: 0,
-      wpmHistory: [],
-    };
+    setWpmStats(initialWpmStats);
+    setWpmHistory([]);
 
-    setWpmStats({ ...wpmStats, ...stats });
-    setCalculateLive(true);
+    intervalRef.current = setInterval(calculateLiveWPM, 1000);
   };
 
   const stopMeasuring = () => {
-    setCalculateLive(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
 
-    const wpmHistory = [...wpmStats.wpmHistory];
+    const wpmHistoryArr = [...wpmHistory];
 
-    for (let i = 0; i < wpmHistory.length; i++) {
-      if (wpmHistory[i].wpm === 0 || wpmHistory[i].rawWpm === 0)
-        wpmHistory.shift();
+    for (let i = 0; i < wpmHistoryArr.length; i++) {
+      if (wpmHistoryArr[i].wpm === 0 || wpmHistoryArr[i].rawWpm === 0)
+        wpmHistoryArr.shift();
       else break;
     }
 
-    setWpmStats({ ...wpmStats, wpmHistory });
+    setWpmHistory(wpmHistoryArr);
+    calculateWPM();
   };
 
-  useEffect(() => {
-    let liveWpmInterval: NodeJS.Timeout;
-
-    if (calculateLive) {
-      liveWpmInterval = setInterval(calculateLiveWPM, 1000);
-    }
-
-    return () => clearInterval(liveWpmInterval);
-  }, [calculateLive, calculateLiveWPM]);
-
   return {
-    calculateWPM,
-    calculateLiveWPM,
     startMeasuring,
     stopMeasuring,
     wpmStats,
+    wpmHistory,
   };
 };
 
-function transformWords({
-  input,
-  text,
-  testMode,
-}: Omit<UseWPMProps, "elapsedTime">) {
+interface TransformWords {
+  input: string;
+  text: string;
+  testMode: TestMode;
+}
+
+function transformWords({ input, text, testMode }: TransformWords) {
   const inputWords = input.split(" ");
 
   let words: string[] = [];
@@ -175,7 +164,7 @@ function calculateAccuracy({ inputWords, words }: CalculateAccuracy) {
     };
 
   for (let i = 0; i < words.length; i++) {
-    for (let j = 0; j < inputWords[i].length; j++) {
+    for (let j = 0; j < inputWords[i]?.length; j++) {
       if (inputWords[i][j] === words[i][j]) correctChars++;
       else incorrectChars++;
     }
