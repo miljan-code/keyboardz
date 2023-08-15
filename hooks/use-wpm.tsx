@@ -2,8 +2,7 @@ import { useEffect, useRef } from "react";
 import { useTimer } from "@/hooks/use-timer";
 import { atom, useAtom } from "jotai";
 
-import { currentTextAtom } from "@/components/test/typing-box";
-import { testModeAtom } from "@/components/test/typing-mode-dialog";
+import { currentTextAtom, testModeAtom } from "@/lib/atoms";
 
 import type { TestMode, WpmHistory, WpmStats } from "@/types/test";
 
@@ -21,7 +20,7 @@ const initialWpmStats = {
 export const wpmStatsAtom = atom<WpmStats>(initialWpmStats);
 const wpmHistoryAtom = atom<WpmHistory[]>([]);
 
-export interface UseWPMProps {
+interface UseWPMProps {
   text: string;
 }
 
