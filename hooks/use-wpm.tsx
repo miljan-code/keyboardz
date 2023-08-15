@@ -150,6 +150,7 @@ function transformWords({
     words = text.split(" ");
   } else {
     words = text.split(" ").slice(0, inputWords.length);
+    words.at(-1)?.slice(0, inputWords.at(-1)?.length);
   }
 
   const correctWords = inputWords.filter((word, i) => word === words[i]).length;

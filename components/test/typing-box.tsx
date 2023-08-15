@@ -37,7 +37,7 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
 
   const { startTimer, stopTimer, resetTimer, elapsedTime } = useTimer();
 
-  const { calculateWPM, startMeasuring, stopMeasuring, wpmStats } = useWpm({
+  const { calculateWPM, startMeasuring, stopMeasuring } = useWpm({
     testMode,
     text,
     elapsedTime,
@@ -111,7 +111,6 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
         setIsInputFocused(true);
       }
 
-      // TODO: add space also
       if (!/^[a-zA-Z]$/.test(e.key)) return null;
 
       if (!testStarted && !testFinished) {
@@ -304,6 +303,13 @@ export const TypingBox = ({ text, testMode }: TypingBoxProps) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!testStarted) return null;
     if (!currentText.length) resetCaret();
+
+    const forbbidenKeys = ["Delete", "ArrowLeft", "ArrowRight"];
+
+    if (forbbidenKeys.includes(e.key)) {
+      e.preventDefault();
+      return null;
+    }
 
     const index = e.currentTarget.value.length - 1;
     if (e.key === "Backspace") {

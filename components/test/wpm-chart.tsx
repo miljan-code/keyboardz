@@ -1,6 +1,6 @@
 "use client";
 
-import { AreaChart } from "@tremor/react";
+import { AreaChart, Grid } from "@tremor/react";
 
 import type { WpmStats } from "@/types/test";
 
@@ -16,13 +16,15 @@ export default function WpmChart({ data }: WpmChartProps) {
   }));
 
   return (
-    <AreaChart
-      className="h-80"
-      data={wpmHistory}
-      categories={["wpm", "raw"]}
-      index="index"
-      colors={["blue", "cyan"]}
-      yAxisWidth={60}
-    />
+    <Grid>
+      <AreaChart
+        className="h-80"
+        data={wpmHistory}
+        categories={["wpm", "raw"]}
+        index="index"
+        colors={["blue", "cyan"]}
+        yAxisWidth={60}
+      />
+    </Grid>
   );
 }
