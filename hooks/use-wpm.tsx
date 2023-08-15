@@ -20,7 +20,7 @@ const initialWpmStats = {
 export const wpmStatsAtom = atom<WpmStats>(initialWpmStats);
 const wpmHistoryAtom = atom<WpmHistory[]>([]);
 
-export interface UseWPMProps {
+interface UseWPMProps {
   text: string;
 }
 

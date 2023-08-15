@@ -1,20 +1,20 @@
 "use client";
 
 import { useTimer } from "@/hooks/use-timer";
-import { useWpm, type UseWPMProps } from "@/hooks/use-wpm";
+import { useWpm } from "@/hooks/use-wpm";
 import { useAtom } from "jotai";
 
 import { testModeAtom } from "@/lib/atoms";
 import WpmChart from "@/components/test/wpm-chart";
 
 interface TestResultProps {
-  wpmInput: UseWPMProps;
+  text: string;
 }
 
-export const TestResult = ({ wpmInput }: TestResultProps) => {
+export const TestResult = ({ text }: TestResultProps) => {
   const [testMode] = useAtom(testModeAtom);
 
-  const { wpmStats, wpmHistory } = useWpm(wpmInput);
+  const { wpmStats, wpmHistory } = useWpm({ text });
   const { elapsedTime } = useTimer();
 
   return (

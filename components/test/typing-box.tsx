@@ -150,14 +150,14 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     // show result
   }, [stopTimer, stopMeasuring]);
 
-  // EXTRACT: endgame 1. check test end timer
+  // endgame 1. check test end timer
   useEffect(() => {
     if (testMode.mode === "words") return;
 
     if (elapsedTime === 0 && testStarted) handleEndTest();
   }, [elapsedTime, handleEndTest, testStarted, testMode.mode]);
 
-  // EXTRACT: endgame 2. check test end words
+  // endgame 2. check test end words
   const checkForEndTestWordsMode = (input: string) => {
     if (input.length === letters.length - 1 && testMode.mode === "words") {
       setCurrentText(input);
@@ -269,7 +269,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   };
 
   if (testFinished) {
-    return <TestResult wpmInput={{ text }} />;
+    return <TestResult text={text} />;
   }
 
   return (
