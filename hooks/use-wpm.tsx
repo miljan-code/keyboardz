@@ -95,7 +95,7 @@ export const useWpm = ({ text }: UseWPMProps) => {
   const stopMeasuring = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
 
-    const wpmHistoryWithoutZeros = removeLeadingZeros(wpmHistory);
+    const wpmHistoryWithoutZeros = removeLeadingZeros(wpmHistory, 1);
 
     setWpmHistory(wpmHistoryWithoutZeros);
     recordWpm();
@@ -155,7 +155,9 @@ function calculateAccuracy({ inputWords, words }: CalculateAccuracy) {
     }
   }
 
-  const accuracy = (correctChars / (correctChars + incorrectChars)) * 100;
+  let accuracy = (correctChars / (correctChars + incorrectChars)) * 100;
+
+  if (Number.isNaN(accuracy)) accuracy = 0;
 
   return {
     accuracy: Math.round(accuracy),
@@ -164,10 +166,11 @@ function calculateAccuracy({ inputWords, words }: CalculateAccuracy) {
   };
 }
 
-function removeLeadingZeros(arr: WpmHistory[]) {
+function removeLeadingZeros(arr: WpmHistory[], amount: number) {
   const newArr = [...arr];
 
   for (let i = 0; i < newArr.length; i++) {
+    if (i === amount) break;
     if (newArr[i].wpm === 0 || newArr[i].rawWpm === 0) newArr.shift();
     else break;
   }

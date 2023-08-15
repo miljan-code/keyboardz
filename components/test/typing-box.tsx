@@ -326,7 +326,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     if (e.key === "Backspace" && e.ctrlKey) {
       const arr = [...letters];
       for (let i = index; i >= 0; i--) {
-        if (letters[i] === " ") break;
+        if (letters[i] === " ") null;
         else if (letters[i] === letters[i].toUpperCase()) {
           arr.splice(i, 1);
         } else break;
