@@ -2,9 +2,10 @@
 
 import { useModal } from "@/hooks/use-modal";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { atom, useAtom } from "jotai";
+import { useAtom } from "jotai";
 import { useForm } from "react-hook-form";
 
+import { testModeAtom } from "@/lib/atoms";
 import { testModeFormSchema } from "@/lib/validations/test-mode-schema";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -31,10 +32,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import type { TestMode } from "@/types/test";
 
-export const testModeAtom = atom<TestMode>({
-  mode: "timer",
-  amount: 60,
-});
+// export const testModeAtom = atom<TestMode>({
+//   mode: "timer",
+//   amount: 60,
+// });
 
 export const TypingModeDialog = () => {
   const [testMode, setTestMode] = useAtom(testModeAtom);

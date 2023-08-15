@@ -4,21 +4,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useModal } from "@/hooks/use-modal";
 import { useTimer } from "@/hooks/use-timer";
+import { useUpdateUI } from "@/hooks/use-update-ui";
 import { useWpm } from "@/hooks/use-wpm";
-import { atom, useAtom } from "jotai";
+import { useAtom } from "jotai";
 
-import { cn, getElementPositionRelativeToParent } from "@/lib/utils";
+import { currentTextAtom, testModeAtom } from "@/lib/atoms";
+import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
-import { testModeAtom } from "@/components/test/typing-mode-dialog";
-import { TestResult } from "./test-result";
+import { TestResult } from "@/components/test/test-result";
 
 interface TypingBoxProps {
   text: string;
 }
 
 const MAX_WRONG_LETTERS = 8;
-
-export const currentTextAtom = atom("");
 
 export const TypingBox = ({ text }: TypingBoxProps) => {
   const [isInputFocused, setIsInputFocused] = useState(true);
@@ -34,9 +33,16 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const caretRef = useRef<HTMLDivElement>(null);
-  const newLineLetterRef = useRef<HTMLSpanElement>(null);
+  const letterRef = useRef<HTMLSpanElement>(null);
 
   const router = useRouter();
+
+  const { updateCaret, resetWrapperBox, checkForNewLine } = useUpdateUI({
+    caretRef,
+    wrapperRef,
+    letterRef,
+    containerRef,
+  });
 
   const { startTimer, stopTimer, resetTimer, elapsedTime } = useTimer();
 
@@ -47,20 +53,8 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   const inputLetters = currentText.split("");
   const inputWords = currentText.split(" ");
 
+  // _ getting added so the text.length+1 can get .new-line class
   useEffect(() => setLetters([...text.split(""), "_"]), [text]);
-
-  const resetCaret = () => {
-    if (!caretRef.current) return null;
-
-    caretRef.current.style.top = "0px";
-    caretRef.current.style.left = "0px";
-  };
-
-  const resetWrapperBox = () => {
-    if (!wrapperRef.current) return null;
-
-    wrapperRef.current.style.transform = `translateY(0px)`;
-  };
 
   const resetTest = useCallback(() => {
     const time = testMode.mode === "timer" ? testMode.amount : 0;
@@ -71,7 +65,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     setAddedLetters(0);
     stopTimer();
     resetTimer(time);
-    resetCaret();
+    updateCaret("reset");
     resetWrapperBox();
     stopMeasuring();
     router.refresh();
@@ -83,6 +77,8 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     testMode.mode,
     stopMeasuring,
     setCurrentText,
+    updateCaret,
+    resetWrapperBox,
   ]);
 
   // Event listener for Tab key to reset the test
@@ -142,73 +138,6 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   // eslint-disable-next-line
   useEffect(() => resetTest(), [testMode.amount, testMode.mode]);
 
-  const checkForNewLine = useCallback(() => {
-    if (!newLineLetterRef.current || !containerRef.current) return null;
-
-    const { offsetTop } = getElementPositionRelativeToParent(
-      newLineLetterRef.current,
-      containerRef.current,
-    );
-
-    const letterHeight =
-      newLineLetterRef.current.getBoundingClientRect().height;
-
-    if (offsetTop < 0) resetWrapperBox();
-
-    if (offsetTop > letterHeight) {
-      if (!wrapperRef.current) return null;
-
-      const currentTranslateY = parseInt(
-        wrapperRef.current.style.transform.slice(11),
-      );
-      const newTranslateY = currentTranslateY - 32;
-      wrapperRef.current.style.transform = `translateY(${newTranslateY}px)`;
-    }
-  }, []);
-
-  const updateCaret = useCallback(
-    (type?: "backspace" | "resize" | "space", distance: number = 0) => {
-      if (!newLineLetterRef.current || !wrapperRef.current) return null;
-
-      const { offsetLeft, offsetTop } = getElementPositionRelativeToParent(
-        newLineLetterRef.current,
-        wrapperRef.current,
-      );
-
-      if (!caretRef.current) return null;
-
-      caretRef.current.style.top = `${offsetTop}px`;
-
-      const letterWidth =
-        newLineLetterRef.current.getBoundingClientRect().width;
-
-      if (type === "backspace") {
-        caretRef.current.style.left = `${offsetLeft - letterWidth * 2}px`;
-      } else if (type === "resize") {
-        caretRef.current.style.left = `${offsetLeft - letterWidth}px`;
-      } else if (type === "space") {
-        caretRef.current.style.left = `${
-          offsetLeft + letterWidth * distance
-        }px`;
-      } else {
-        caretRef.current.style.left = `${offsetLeft}px`;
-      }
-    },
-    [],
-  );
-
-  useEffect(() => {
-    const handleCaretAndLineOnResize = () => {
-      checkForNewLine();
-      updateCaret("resize");
-    };
-
-    window.addEventListener("resize", handleCaretAndLineOnResize);
-
-    return () =>
-      window.removeEventListener("resize", handleCaretAndLineOnResize);
-  }, [checkForNewLine, updateCaret]);
-
   const handleEndTest = useCallback(() => {
     stopTimer();
     stopMeasuring();
@@ -221,87 +150,75 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     // show result
   }, [stopTimer, stopMeasuring]);
 
+  // EXTRACT: endgame 1. check test end timer
   useEffect(() => {
     if (testMode.mode === "words") return;
 
     if (elapsedTime === 0 && testStarted) handleEndTest();
   }, [elapsedTime, handleEndTest, testStarted, testMode.mode]);
 
-  const checkForEndTestWordsMode = useCallback(
-    (input: string) => {
-      if (input.length === letters.length - 1 && testMode.mode === "words") {
-        setCurrentText(input);
-        handleEndTest();
+  // EXTRACT: endgame 2. check test end words
+  const checkForEndTestWordsMode = (input: string) => {
+    if (input.length === letters.length - 1 && testMode.mode === "words") {
+      setCurrentText(input);
+      handleEndTest();
+      return null;
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (testFinished) return null;
+
+    const inputLength = e.currentTarget.value.length;
+    const nextLetterToType = letters[inputLength - 1];
+    const currentLetter = e.currentTarget.value.at(-1);
+
+    if (currentLetter === " ") {
+      if (nextLetterToType === " ") {
+        checkForNewLine();
+        setAddedLetters(0);
+      } else {
+        e.preventDefault();
+        const isStart = !currentText.length;
+        const isNewWord = currentText.at(-1) === " ";
+
+        if (isStart || isNewWord) return null;
+
+        const startingIndex = currentText.length - 1;
+        let distance = 0;
+        for (let i = startingIndex; i < letters.length; i++) {
+          if (letters[i] === " ") {
+            distance = i - startingIndex;
+            break;
+          }
+        }
+
+        const newText = currentText + "_".repeat(distance - 1) + " ";
+        setCurrentText(newText);
+        updateCaret("space", distance - 1);
         return null;
       }
-    },
-    [testMode.mode, letters.length, handleEndTest, setCurrentText],
-  );
+    }
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (testFinished) return null;
+    if (nextLetterToType === " " && currentLetter !== " ") {
+      if (addedLetters > MAX_WRONG_LETTERS) return null;
 
-      const inputLength = e.currentTarget.value.length;
-      const nextLetterToType = letters[inputLength - 1];
-      const currentLetter = e.currentTarget.value.at(-1);
+      const arr = [...letters];
+      arr.splice(inputLength - 1, 0, currentLetter?.toUpperCase() || "_");
+      setLetters(arr);
+      setAddedLetters((prev) => prev + 1);
+    }
 
-      if (currentLetter === " ") {
-        if (nextLetterToType === " ") {
-          checkForNewLine();
-          setAddedLetters(0);
-        } else {
-          e.preventDefault();
-          const isStart = !currentText.length;
-          const isNewWord = currentText.at(-1) === " ";
+    if (currentText.length > inputLength) updateCaret("backspace");
+    else updateCaret();
 
-          if (isStart || isNewWord) return null;
-
-          const startingIndex = currentText.length - 1;
-          let distance = 0;
-          for (let i = startingIndex; i < letters.length; i++) {
-            if (letters[i] === " ") {
-              distance = i - startingIndex;
-              break;
-            }
-          }
-
-          const newText = currentText + "_".repeat(distance - 1) + " ";
-          setCurrentText(newText);
-          updateCaret("space", distance - 1);
-          return null;
-        }
-      }
-
-      if (nextLetterToType === " " && currentLetter !== " ") {
-        if (addedLetters > MAX_WRONG_LETTERS) return null;
-
-        const arr = [...letters];
-        arr.splice(inputLength - 1, 0, currentLetter?.toUpperCase() || "_");
-        setLetters(arr);
-        setAddedLetters((prev) => prev + 1);
-      }
-
-      if (currentText.length > inputLength) updateCaret("backspace");
-      else updateCaret();
-
-      setCurrentText(e.currentTarget.value);
-    },
-    [
-      testFinished,
-      checkForNewLine,
-      updateCaret,
-      currentText,
-      letters,
-      addedLetters,
-      setCurrentText,
-    ],
-  );
+    setCurrentText(e.currentTarget.value);
+  };
 
   // Fixes backspace bug, resets caret if input is empty
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!testStarted) return null;
-    if (!currentText.length) resetCaret();
+    if (!currentText.length) updateCaret("reset");
 
     const forbbidenKeys = ["Delete", "ArrowLeft", "ArrowRight"];
 
@@ -346,13 +263,10 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     checkForEndTestWordsMode(e.currentTarget.value);
   };
 
-  const handleInputFocus = useCallback(
-    (e: React.FocusEvent<HTMLInputElement, Element>) => {
-      if (e.type === "blur") setIsInputFocused(false);
-      else setIsInputFocused(true);
-    },
-    [],
-  );
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement, Element>) => {
+    if (e.type === "blur") setIsInputFocused(false);
+    else setIsInputFocused(true);
+  };
 
   if (testFinished) {
     return <TestResult wpmInput={{ text }} />;
@@ -387,7 +301,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
           {letters.map((letter, i) => (
             <span
               key={letter + i}
-              ref={i === currentText.length + 1 ? newLineLetterRef : null}
+              ref={i === currentText.length + 1 ? letterRef : null}
               className={cn("relative text-2xl text-foreground/60", {
                 "text-primary":
                   i <= currentText.length && inputLetters[i] === letters[i],

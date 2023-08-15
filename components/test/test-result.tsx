@@ -4,7 +4,7 @@ import { useTimer } from "@/hooks/use-timer";
 import { useWpm, type UseWPMProps } from "@/hooks/use-wpm";
 import { useAtom } from "jotai";
 
-import { testModeAtom } from "@/components/test/typing-mode-dialog";
+import { testModeAtom } from "@/lib/atoms";
 import WpmChart from "@/components/test/wpm-chart";
 
 interface TestResultProps {
