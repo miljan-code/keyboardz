@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
+import { useTimer } from "@/hooks/use-timer";
 import { atom, useAtom } from "jotai";
 
 import { currentTextAtom } from "@/components/test/typing-box";
 import { testModeAtom } from "@/components/test/typing-mode-dialog";
-import { useTimer } from "./use-timer";
 
 import type { TestMode, WpmHistory, WpmStats } from "@/types/test";
 
@@ -18,7 +18,7 @@ const initialWpmStats = {
   },
 };
 
-const wpmStatsAtom = atom<WpmStats>(initialWpmStats);
+export const wpmStatsAtom = atom<WpmStats>(initialWpmStats);
 const wpmHistoryAtom = atom<WpmHistory[]>([]);
 
 export interface UseWPMProps {
@@ -52,10 +52,8 @@ export const useWpm = ({ text }: UseWPMProps) => {
   }, [correctWords, elapsedTime, inputWords]);
 
   const calculateWPM = () => {
-    const time = testMode.mode === "timer" ? testMode.amount : elapsedTime;
-
-    const wpm = Math.round(correctWords / (time / 60));
-    const rawWpm = Math.round(inputWords.length / (time / 60));
+    const time = getTestTime({ elapsedTime, testMode, type: "calculate" });
+    const { wpm, rawWpm } = getWPM({ correctWords, inputWords, time });
     const { accuracy, correct, incorrect } = calculateAccuracy({
       inputWords,
       words,
@@ -74,46 +72,33 @@ export const useWpm = ({ text }: UseWPMProps) => {
     setWpmStats({ ...wpmStats, ...stats });
   };
 
-  const calculateLiveWPM = () => {
+  const recordWpm = () => {
     const correctWords = correctWordsRef.current;
     const inputWords = inputWordsRef.current;
     const elapsedTime = elapsedTimeRef.current;
 
-    const time =
-      testMode.mode === "timer" ? testMode.amount - elapsedTime : elapsedTime;
+    const time = getTestTime({ elapsedTime, testMode, type: "record" });
 
-    let liveWpm = Math.round(correctWords / (time / 60));
-    let liveRawWpm = Math.round(inputWords.length / (time / 60));
+    const { wpm, rawWpm } = getWPM({ correctWords, inputWords, time });
 
-    if (Number.isNaN(liveWpm) || !Number.isFinite(liveWpm)) {
-      liveWpm = 0;
-    }
-    if (Number.isNaN(liveRawWpm) || !Number.isFinite(liveRawWpm)) {
-      liveRawWpm = 0;
-    }
-
-    setWpmHistory((prev) => [...prev, { wpm: liveRawWpm, rawWpm: liveWpm }]);
+    setWpmHistory((prev) => [...prev, { wpm, rawWpm }]);
+    setWpmStats({ ...wpmStats, liveWpm: wpm });
   };
 
   const startMeasuring = () => {
     setWpmStats(initialWpmStats);
     setWpmHistory([]);
 
-    intervalRef.current = setInterval(calculateLiveWPM, 1000);
+    intervalRef.current = setInterval(recordWpm, 1000);
   };
 
   const stopMeasuring = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
 
-    const wpmHistoryArr = [...wpmHistory];
+    const wpmHistoryWithoutZeros = removeLeadingZeros(wpmHistory);
 
-    for (let i = 0; i < wpmHistoryArr.length; i++) {
-      if (wpmHistoryArr[i].wpm === 0 || wpmHistoryArr[i].rawWpm === 0)
-        wpmHistoryArr.shift();
-      else break;
-    }
-
-    setWpmHistory(wpmHistoryArr);
+    setWpmHistory(wpmHistoryWithoutZeros);
+    recordWpm();
     calculateWPM();
   };
 
@@ -177,4 +162,51 @@ function calculateAccuracy({ inputWords, words }: CalculateAccuracy) {
     correct: correctChars,
     incorrect: incorrectChars,
   };
+}
+
+function removeLeadingZeros(arr: WpmHistory[]) {
+  const newArr = [...arr];
+
+  for (let i = 0; i < newArr.length; i++) {
+    if (newArr[i].wpm === 0 || newArr[i].rawWpm === 0) newArr.shift();
+    else break;
+  }
+
+  return newArr;
+}
+
+interface GetWPM {
+  correctWords: number;
+  inputWords: string[];
+  time: number;
+}
+
+function getWPM({ correctWords, inputWords, time }: GetWPM) {
+  let wpm = Math.round(correctWords / (time / 60));
+  let rawWpm = Math.round(inputWords.length / (time / 60));
+
+  if (Number.isNaN(wpm) || !Number.isFinite(wpm)) {
+    wpm = 0;
+  }
+  if (Number.isNaN(rawWpm) || !Number.isFinite(rawWpm)) {
+    rawWpm = 0;
+  }
+
+  return { wpm, rawWpm };
+}
+
+interface GetTestTime {
+  elapsedTime: number;
+  type: "calculate" | "record";
+  testMode: TestMode;
+}
+
+function getTestTime({ elapsedTime, type, testMode }: GetTestTime) {
+  if (type === "calculate") {
+    return testMode.mode === "timer" ? testMode.amount : elapsedTime;
+  } else {
+    return testMode.mode === "timer"
+      ? testMode.amount - elapsedTime
+      : elapsedTime;
+  }
 }
