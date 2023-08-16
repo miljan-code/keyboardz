@@ -6,6 +6,7 @@ import { siteConfig } from "@/config/site";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { Toaster } from "@/components/ui/toaster";
 
 import "@/styles/globals.css";
 
@@ -87,6 +88,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             {children}
             <Footer />
           </main>
+          <Toaster />
         </body>
       </html>
     </AuthProvider>
