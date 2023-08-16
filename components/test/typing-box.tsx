@@ -95,6 +95,10 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     return () => window.removeEventListener("keydown", handleResetTest);
   }, [resetTest]);
 
+  // resets test when mode is changed
+  // eslint-disable-next-line
+  useEffect(() => resetTest(), [testMode.amount, testMode.mode]);
+
   // Event listener for any keystroke to remove input blur
   useEffect(() => {
     const handleFocusOnKeystroke = (e: KeyboardEvent) => {
@@ -106,8 +110,10 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
         setIsInputFocused(true);
       }
 
+      // starts test only if key is a-Z
       if (!/^[a-zA-Z]$/.test(e.key)) return null;
 
+      // starts test
       if (!testStarted && !testFinished) {
         setTestStarted(true);
         startMeasuring();
@@ -134,10 +140,6 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     startMeasuring,
   ]);
 
-  // resets test when mode is changed
-  // eslint-disable-next-line
-  useEffect(() => resetTest(), [testMode.amount, testMode.mode]);
-
   const handleEndTest = useCallback(() => {
     stopTimer();
     stopMeasuring();
@@ -145,21 +147,12 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     setTestStarted(false);
   }, [stopTimer, stopMeasuring]);
 
-  // endgame 1. check test end timer
+  // Check if test is finished on timer mode
   useEffect(() => {
     if (testMode.mode === "words") return;
 
     if (elapsedTime === 0 && testStarted) handleEndTest();
   }, [elapsedTime, handleEndTest, testStarted, testMode.mode]);
-
-  // endgame 2. check test end words
-  const checkForEndTestWordsMode = (input: string) => {
-    if (input.length === letters.length - 1 && testMode.mode === "words") {
-      setCurrentText(input);
-      handleEndTest();
-      return null;
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (testFinished) return null;
@@ -168,11 +161,14 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     const nextLetterToType = letters[inputLength - 1];
     const currentLetter = e.currentTarget.value.at(-1);
 
+    // Checks if space is pressed
     if (currentLetter === " ") {
+      // if yes reset added words and check if theres need for new line
       if (nextLetterToType === " ") {
         checkForNewLine();
         setAddedLetters(0);
       } else {
+        // if no skip current word
         e.preventDefault();
         const isStart = !currentText.length;
         const isNewWord = currentText.at(-1) === " ";
@@ -195,6 +191,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       }
     }
 
+    // displays missed letters to the ui
     if (nextLetterToType === " " && currentLetter !== " ") {
       if (addedLetters > MAX_WRONG_LETTERS) return null;
 
@@ -210,7 +207,6 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     setCurrentText(e.currentTarget.value);
   };
 
-  // Fixes backspace bug, resets caret if input is empty
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!testStarted) return null;
     if (!currentText.length) updateCaret("reset");
@@ -222,6 +218,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       return null;
     }
 
+    // Handle backspace
     const index = e.currentTarget.value.length - 1;
     if (e.key === "Backspace") {
       const letter = letters[index];
@@ -235,6 +232,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       setAddedLetters((prev) => prev - 1);
     }
 
+    // Handle backspace + ctrl
     if (e.key === "Backspace" && e.ctrlKey) {
       const arr = [...letters];
       for (let i = index; i >= 0; i--) {
@@ -255,7 +253,15 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       updateCaret("resize");
     }
 
-    checkForEndTestWordsMode(e.currentTarget.value);
+    // Checks if test is finished
+    if (
+      e.currentTarget.value.length === letters.length - 1 &&
+      testMode.mode === "words"
+    ) {
+      setCurrentText(e.currentTarget.value);
+      handleEndTest();
+      return null;
+    }
   };
 
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement, Element>) => {
