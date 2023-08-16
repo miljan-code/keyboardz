@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 
@@ -71,21 +72,23 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
-      <body
-        className={cn(
-          fontSans.variable,
-          fontHeading.variable,
-          fontMono.variable,
-          "dark font-sans antialiased",
-        )}
-      >
-        <main className="mx-auto grid min-h-screen max-w-7xl grid-flow-row grid-rows-[auto_1fr_auto] gap-6 px-8 py-6">
-          <Header />
-          {children}
-          <Footer />
-        </main>
-      </body>
-    </html>
+    <AuthProvider>
+      <html lang="en">
+        <body
+          className={cn(
+            fontSans.variable,
+            fontHeading.variable,
+            fontMono.variable,
+            "dark font-sans antialiased",
+          )}
+        >
+          <main className="mx-auto grid min-h-screen max-w-7xl grid-flow-row grid-rows-[auto_1fr_auto] gap-6 px-8 py-6">
+            <Header />
+            {children}
+            <Footer />
+          </main>
+        </body>
+      </html>
+    </AuthProvider>
   );
 }

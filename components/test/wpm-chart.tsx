@@ -8,7 +8,7 @@ interface WpmChartProps {
   data: WpmHistory[];
 }
 
-export default function WpmChart({ data }: WpmChartProps) {
+export const WpmChart = ({ data }: WpmChartProps) => {
   const wpmHistory = data.map((item, i) => ({
     index: i + 1,
     wpm: item.wpm,
@@ -27,4 +27,4 @@ export default function WpmChart({ data }: WpmChartProps) {
       />
     </Grid>
   );
-}
+};

@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
-import type { NextAuthOptions } from "next-auth";
+import { getServerSession, type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 import { users } from "@/db/schema";
@@ -55,4 +55,10 @@ export const authOptions: NextAuthOptions = {
       };
     },
   },
+};
+
+export const getSession = async () => {
+  const session = await getServerSession(authOptions);
+
+  return session;
 };

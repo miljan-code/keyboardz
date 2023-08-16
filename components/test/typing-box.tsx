@@ -141,13 +141,8 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   const handleEndTest = useCallback(() => {
     stopTimer();
     stopMeasuring();
-
     setTestFinished(true);
     setTestStarted(false);
-
-    // check if authed - save to db
-
-    // show result
   }, [stopTimer, stopMeasuring]);
 
   // endgame 1. check test end timer
