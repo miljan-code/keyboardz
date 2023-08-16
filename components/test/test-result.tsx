@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTimer } from "@/hooks/use-timer";
 import { useWpm } from "@/hooks/use-wpm";
 import { useAtom } from "jotai";
+import { useSession } from "next-auth/react";
 
 import { testModeAtom } from "@/lib/atoms";
-import WpmChart from "@/components/test/wpm-chart";
+import { WpmChart } from "@/components/test/wpm-chart";
 
 interface TestResultProps {
   text: string;
@@ -14,8 +16,15 @@ interface TestResultProps {
 export const TestResult = ({ text }: TestResultProps) => {
   const [testMode] = useAtom(testModeAtom);
 
+  const { data: session } = useSession();
   const { wpmStats, wpmHistory } = useWpm({ text });
   const { elapsedTime } = useTimer();
+
+  useEffect(() => {
+    if (!session?.user.id) return;
+
+    // save result to db
+  }, [session?.user.id]);
 
   return (
     <section className="w-full space-y-4">
