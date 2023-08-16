@@ -38,7 +38,6 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   const isInitialRenderRef = useRef(true);
 
   const router = useRouter();
-
   const { updateCaret, resetWrapperBox, checkForNewLine } = useUpdateUI({
     caretRef,
     wrapperRef,
@@ -53,8 +52,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   const inputLetters = currentText.split("");
   const inputWords = currentText.split(" ");
 
-  // _ getting added so the text.length+1 can get .new-line class
-  useEffect(() => setLetters([...text.split(""), "_"]), [text]);
+  useEffect(() => setLetters(text.split("")), [text]);
 
   const resetTest = useCallback(() => {
     const time = testMode.mode === "timer" ? testMode.amount : 0;
@@ -262,7 +260,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
     // Checks if test is finished
     if (
-      e.currentTarget.value.length === letters.length - 1 &&
+      e.currentTarget.value.length === letters.length &&
       testMode.mode === "words"
     ) {
       setCurrentText(e.currentTarget.value);
@@ -331,8 +329,6 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
                   (i <= currentText.length - 1 &&
                     inputLetters[i] !== letters[i]) ||
                   !/^[a-z]$/.test(letters[i]),
-                "new-line": i === currentText.length + 1,
-                invisible: i === letters.length - 1,
               })}
             >
               {letter.toLowerCase()}
