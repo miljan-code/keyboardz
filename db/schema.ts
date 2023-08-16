@@ -1,8 +1,10 @@
 import type { AdapterAccount } from "@auth/core/adapters";
 import {
+  index,
   integer,
   pgTable,
   primaryKey,
+  serial,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
@@ -54,5 +56,24 @@ export const verificationTokens = pgTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier, vt.token),
+  }),
+);
+
+export const tests = pgTable(
+  "test",
+  {
+    id: serial("id").notNull().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    wpm: integer("wpm").notNull(),
+    rawWpm: integer("raw_wpm").notNull(),
+    accuracy: integer("accuracy").notNull(),
+    mode: text("mode").notNull(),
+    amount: integer("amount").notNull(),
+    created_at: timestamp("created_at").notNull().defaultNow(),
+  },
+  (test) => ({
+    userIdIdx: index("user_id_idx").on(test.userId),
   }),
 );

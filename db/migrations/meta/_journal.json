@@ -8,6 +8,27 @@
       "when": 1692172210959,
       "tag": "0000_steep_the_phantom",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1692175058100,
+      "tag": "0001_soft_harrier",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1692176510427,
+      "tag": "0002_bizarre_madripoor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1692176680533,
+      "tag": "0003_wonderful_puppet_master",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "test" ADD COLUMN "accuracy" integer NOT NULL;
