@@ -3,9 +3,9 @@ import localFont from "next/font/local";
 
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
-import { AuthProvider } from "@/components/auth/auth-provider";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
 
 import "@/styles/globals.css";
@@ -73,7 +73,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <AuthProvider>
+    <Providers>
       <html lang="en">
         <body
           className={cn(
@@ -91,6 +91,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <Toaster />
         </body>
       </html>
-    </AuthProvider>
+    </Providers>
   );
 }

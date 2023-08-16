@@ -1,8 +1,6 @@
 import { useCallback, useEffect } from "react";
 
-import { getElementPositionRelativeToParent } from "@/lib/utils";
-
-interface UseCaretProps<T extends HTMLElement> {
+interface UseUpdateUIProps<T extends HTMLElement> {
   caretRef: React.RefObject<T>;
   letterRef: React.RefObject<T>;
   wrapperRef: React.RefObject<T>;
@@ -14,7 +12,7 @@ export const useUpdateUI = <T extends HTMLElement>({
   letterRef,
   wrapperRef,
   containerRef,
-}: UseCaretProps<T>) => {
+}: UseUpdateUIProps<T>) => {
   const updateCaret = useCallback(
     (
       type?: "backspace" | "resize" | "space" | "reset",
@@ -94,3 +92,19 @@ export const useUpdateUI = <T extends HTMLElement>({
 
   return { updateCaret, resetWrapperBox, checkForNewLine };
 };
+
+function getElementPositionRelativeToParent<T extends Element>(
+  child: T,
+  parent: T,
+) {
+  const parentTopOffset = parent.getBoundingClientRect().top;
+  const parentLeftOffset = parent.getBoundingClientRect().left;
+
+  const childTopOffset = child.getBoundingClientRect().top;
+  const childLeftOffset = child.getBoundingClientRect().left;
+
+  const offsetLeft = childLeftOffset - parentLeftOffset;
+  const offsetTop = childTopOffset - parentTopOffset;
+
+  return { offsetLeft, offsetTop };
+}
