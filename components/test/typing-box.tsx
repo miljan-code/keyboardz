@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCapslockStatus } from "@/hooks/use-capslock-status";
 import { useModal } from "@/hooks/use-modal";
 import { useTimer } from "@/hooks/use-timer";
 import { useUpdateUI } from "@/hooks/use-update-ui";
@@ -43,12 +44,10 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     letterRef,
     containerRef,
   });
-
   const { startTimer, stopTimer, resetTimer, elapsedTime } = useTimer();
-
   const { startMeasuring, stopMeasuring } = useWpm({ text });
-
   const { isModalOpen } = useModal();
+  const { isCaps } = useCapslockStatus();
 
   const inputLetters = currentText.split("");
   const inputWords = currentText.split(" ");
@@ -104,17 +103,18 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     const handleFocusOnKeystroke = (e: KeyboardEvent) => {
       if (!inputRef.current) return null;
 
+      // focuses and starts the test only on a-z keys
+      if (!/^[a-zA-Z]$/.test(e.key)) return null;
+
       if (document.activeElement !== inputRef.current) {
         e.preventDefault();
         inputRef.current.focus();
         setIsInputFocused(true);
+        return;
       }
 
-      // starts test only if key is a-Z
-      if (!/^[a-zA-Z]$/.test(e.key)) return null;
-
       // starts test
-      if (!testStarted && !testFinished) {
+      if (!testStarted && !testFinished && !isCaps) {
         setTestStarted(true);
         startMeasuring();
         if (testMode.mode === "timer") {
@@ -138,6 +138,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     testMode.mode,
     testStarted,
     startMeasuring,
+    isCaps,
   ]);
 
   const handleEndTest = useCallback(() => {
@@ -155,7 +156,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   }, [elapsedTime, handleEndTest, testStarted, testMode.mode]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (testFinished) return null;
+    if (testFinished || isCaps) return null;
 
     const inputLength = e.currentTarget.value.length;
     const nextLetterToType = letters[inputLength - 1];
@@ -275,20 +276,34 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
   return (
     <div className="relative">
-      <div
-        className={cn(
-          "mb-2 flex items-center gap-2 text-lg font-medium text-primary transition-opacity",
-          {
-            "opacity-0": !testStarted,
-          },
-        )}
-      >
-        {testMode.mode === "words" && (
-          <span>
-            {inputWords.length - 1}/{testMode.amount}
-          </span>
-        )}
-        <span>{elapsedTime}</span>
+      <div className="flex items-center justify-between">
+        <div
+          className={cn(
+            "mb-2 flex items-center gap-2 text-lg font-medium text-primary transition-opacity",
+            {
+              "opacity-0": !testStarted,
+            },
+          )}
+        >
+          {testMode.mode === "words" && (
+            <span>
+              {inputWords.length - 1}/{testMode.amount}
+            </span>
+          )}
+          <span>{elapsedTime}</span>
+        </div>
+        <div
+          className={cn(
+            "flex -translate-y-10 items-center gap-2 rounded-md bg-primary px-4 py-2 transition-opacity",
+            {
+              "opacity-0": !isCaps,
+            },
+          )}
+        >
+          <span className="font-medium text-background">CapsLock</span>
+          <Icons.lock size={16} className="text-background" />
+        </div>
+        <div />
       </div>
       <div
         ref={containerRef}

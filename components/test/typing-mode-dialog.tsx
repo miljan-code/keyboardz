@@ -32,11 +32,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import type { TestMode } from "@/types/test";
 
-// export const testModeAtom = atom<TestMode>({
-//   mode: "timer",
-//   amount: 60,
-// });
-
 export const TypingModeDialog = () => {
   const [testMode, setTestMode] = useAtom(testModeAtom);
 
@@ -114,11 +109,7 @@ export const TypingModeDialog = () => {
                   <FormItem>
                     <FormLabel>Amount</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        {...field}
-                        {...form.register("amount", { valueAsNumber: true })}
-                      />
+                      <Input type="number" {...field} />
                     </FormControl>
                     <FormDescription>
                       Amount of {mode === "timer" ? "seconds" : "words"}

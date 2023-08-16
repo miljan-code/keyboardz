@@ -2,6 +2,7 @@ import {
   Code,
   GitFork,
   Languages,
+  Lock,
   MousePointer,
   Timer,
   UserCircle,
@@ -15,6 +16,7 @@ export const Icons = {
   pointer: MousePointer,
   timer: Timer,
   words: Languages,
+  lock: Lock,
   logo: ({ ...props }: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
