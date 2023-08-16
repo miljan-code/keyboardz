@@ -35,6 +35,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const caretRef = useRef<HTMLDivElement>(null);
   const letterRef = useRef<HTMLSpanElement>(null);
+  const isInitialRenderRef = useRef(true);
 
   const router = useRouter();
 
@@ -95,8 +96,14 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   }, [resetTest]);
 
   // resets test when mode is changed
-  // eslint-disable-next-line
-  useEffect(() => resetTest(), [testMode.amount, testMode.mode]);
+  useEffect(() => {
+    if (!isInitialRenderRef.current) {
+      resetTest();
+    } else {
+      isInitialRenderRef.current = false;
+    }
+    // eslint-disable-next-line
+  }, [testMode.amount, testMode.mode]);
 
   // Event listener for any keystroke to remove input blur
   useEffect(() => {
