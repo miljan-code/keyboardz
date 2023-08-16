@@ -244,8 +244,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     if (e.key === "Backspace" && e.ctrlKey) {
       const arr = [...letters];
       for (let i = index; i >= 0; i--) {
-        if (letters[i] === " ") null;
-        else if (letters[i] === letters[i].toUpperCase()) {
+        if (letters[i] === letters[i].toUpperCase()) {
           arr.splice(i, 1);
         } else break;
       }
@@ -329,7 +328,9 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
                 "text-primary":
                   i <= currentText.length && inputLetters[i] === letters[i],
                 "text-red-500":
-                  i <= currentText.length - 1 && inputLetters[i] !== letters[i],
+                  (i <= currentText.length - 1 &&
+                    inputLetters[i] !== letters[i]) ||
+                  !/^[a-z]$/.test(letters[i]),
                 "new-line": i === currentText.length + 1,
                 invisible: i === letters.length - 1,
               })}
