@@ -4,15 +4,6 @@ import { Icons } from "@/components/icons";
 export const Footer = () => {
   return (
     <footer className="space-y-4 text-sm">
-      <div className="flex items-center justify-center gap-12">
-        <div className="flex cursor-default gap-1.5">
-          <span className="rounded-md bg-foreground px-1.5 font-medium text-background">
-            tab
-          </span>
-          <span>&mdash;</span>
-          <span className="font-medium">restart test</span>
-        </div>
-      </div>
       <div className="flex items-center justify-between">
         <a
           href={siteConfig.links.github}
