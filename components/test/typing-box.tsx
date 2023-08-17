@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCapslockStatus } from "@/hooks/use-capslock-status";
 import { useModal } from "@/hooks/use-modal";
 import { useTimer } from "@/hooks/use-timer";
 import { useUpdateUI } from "@/hooks/use-update-ui";
@@ -34,27 +35,24 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const caretRef = useRef<HTMLDivElement>(null);
   const letterRef = useRef<HTMLSpanElement>(null);
+  const isInitialRenderRef = useRef(true);
 
   const router = useRouter();
-
   const { updateCaret, resetWrapperBox, checkForNewLine } = useUpdateUI({
     caretRef,
     wrapperRef,
     letterRef,
     containerRef,
   });
-
   const { startTimer, stopTimer, resetTimer, elapsedTime } = useTimer();
-
   const { startMeasuring, stopMeasuring } = useWpm({ text });
-
   const { isModalOpen } = useModal();
+  const { isCaps } = useCapslockStatus();
 
   const inputLetters = currentText.split("");
   const inputWords = currentText.split(" ");
 
-  // _ getting added so the text.length+1 can get .new-line class
-  useEffect(() => setLetters([...text.split(""), "_"]), [text]);
+  useEffect(() => setLetters(text.split("")), [text]);
 
   const resetTest = useCallback(() => {
     const time = testMode.mode === "timer" ? testMode.amount : 0;
@@ -96,25 +94,32 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   }, [resetTest]);
 
   // resets test when mode is changed
-  // eslint-disable-next-line
-  useEffect(() => resetTest(), [testMode.amount, testMode.mode]);
+  useEffect(() => {
+    if (!isInitialRenderRef.current) {
+      resetTest();
+    } else {
+      isInitialRenderRef.current = false;
+    }
+    // eslint-disable-next-line
+  }, [testMode.amount, testMode.mode]);
 
   // Event listener for any keystroke to remove input blur
   useEffect(() => {
     const handleFocusOnKeystroke = (e: KeyboardEvent) => {
       if (!inputRef.current) return null;
 
+      // focuses and starts the test only on a-z keys
+      if (!/^[a-zA-Z]$/.test(e.key)) return null;
+
       if (document.activeElement !== inputRef.current) {
         e.preventDefault();
         inputRef.current.focus();
         setIsInputFocused(true);
+        return;
       }
 
-      // starts test only if key is a-Z
-      if (!/^[a-zA-Z]$/.test(e.key)) return null;
-
       // starts test
-      if (!testStarted && !testFinished) {
+      if (!testStarted && !testFinished && !isCaps) {
         setTestStarted(true);
         startMeasuring();
         if (testMode.mode === "timer") {
@@ -138,6 +143,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     testMode.mode,
     testStarted,
     startMeasuring,
+    isCaps,
   ]);
 
   const handleEndTest = useCallback(() => {
@@ -155,7 +161,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   }, [elapsedTime, handleEndTest, testStarted, testMode.mode]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (testFinished) return null;
+    if (testFinished || isCaps) return null;
 
     const inputLength = e.currentTarget.value.length;
     const nextLetterToType = letters[inputLength - 1];
@@ -218,8 +224,13 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       return null;
     }
 
-    // Handle backspace
+    // Handle backspace + ctrl
     const index = e.currentTarget.value.length - 1;
+    if (e.key === "Backspace" && e.ctrlKey) {
+      e.preventDefault();
+    }
+
+    // Handle backspace
     if (e.key === "Backspace") {
       const letter = letters[index];
 
@@ -231,21 +242,6 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       setLetters(arr);
       setAddedLetters((prev) => prev - 1);
     }
-
-    // Handle backspace + ctrl
-    if (e.key === "Backspace" && e.ctrlKey) {
-      const arr = [...letters];
-      for (let i = index; i >= 0; i--) {
-        if (letters[i] === " ") null;
-        else if (letters[i] === letters[i].toUpperCase()) {
-          arr.splice(i, 1);
-        } else break;
-      }
-
-      setAddedLetters(0);
-      setLetters(arr);
-      updateCaret();
-    }
   };
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -255,7 +251,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
     // Checks if test is finished
     if (
-      e.currentTarget.value.length === letters.length - 1 &&
+      e.currentTarget.value.length === letters.length &&
       testMode.mode === "words"
     ) {
       setCurrentText(e.currentTarget.value);
@@ -275,20 +271,34 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
   return (
     <div className="relative">
-      <div
-        className={cn(
-          "mb-2 flex items-center gap-2 text-lg font-medium text-primary transition-opacity",
-          {
-            "opacity-0": !testStarted,
-          },
-        )}
-      >
-        {testMode.mode === "words" && (
-          <span>
-            {inputWords.length - 1}/{testMode.amount}
-          </span>
-        )}
-        <span>{elapsedTime}</span>
+      <div className="flex items-center justify-between">
+        <div
+          className={cn(
+            "mb-2 flex items-center gap-2 text-lg font-medium text-primary transition-opacity",
+            {
+              "opacity-0": !testStarted,
+            },
+          )}
+        >
+          {testMode.mode === "words" && (
+            <span>
+              {inputWords.length - 1}/{testMode.amount}
+            </span>
+          )}
+          <span>{elapsedTime}</span>
+        </div>
+        <div
+          className={cn(
+            "flex -translate-y-10 items-center gap-2 rounded-md bg-primary px-4 py-2 transition-opacity",
+            {
+              "opacity-0": !isCaps,
+            },
+          )}
+        >
+          <span className="font-medium text-background">CapsLock</span>
+          <Icons.lock size={16} className="text-background" />
+        </div>
+        <div />
       </div>
       <div
         ref={containerRef}
@@ -307,9 +317,9 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
                 "text-primary":
                   i <= currentText.length && inputLetters[i] === letters[i],
                 "text-red-500":
-                  i <= currentText.length - 1 && inputLetters[i] !== letters[i],
-                "new-line": i === currentText.length + 1,
-                invisible: i === letters.length - 1,
+                  (i <= currentText.length - 1 &&
+                    inputLetters[i] !== letters[i]) ||
+                  !/^[a-z]$/.test(letters[i]),
               })}
             >
               {letter.toLowerCase()}

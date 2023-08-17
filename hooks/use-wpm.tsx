@@ -170,7 +170,7 @@ function removeLeadingZeros(arr: WpmHistory[], amount: number) {
 
   for (let i = 0; i < newArr.length; i++) {
     if (i === amount) break;
-    if (newArr[i].wpm === 0 || newArr[i].rawWpm === 0) newArr.shift();
+    if (newArr[i].wpm === 0 && newArr[i].rawWpm === 0) newArr.shift();
     else break;
   }
 
