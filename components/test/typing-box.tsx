@@ -224,8 +224,13 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       return null;
     }
 
-    // Handle backspace
+    // Handle backspace + ctrl
     const index = e.currentTarget.value.length - 1;
+    if (e.key === "Backspace" && e.ctrlKey) {
+      e.preventDefault();
+    }
+
+    // Handle backspace
     if (e.key === "Backspace") {
       const letter = letters[index];
 
@@ -236,20 +241,6 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       arr.splice(index, 1);
       setLetters(arr);
       setAddedLetters((prev) => prev - 1);
-    }
-
-    // Handle backspace + ctrl
-    if (e.key === "Backspace" && e.ctrlKey) {
-      const arr = [...letters];
-      for (let i = index; i >= 0; i--) {
-        if (letters[i] === letters[i].toUpperCase()) {
-          arr.splice(i, 1);
-        } else break;
-      }
-
-      setAddedLetters(0);
-      setLetters(arr);
-      updateCaret();
     }
   };
 
