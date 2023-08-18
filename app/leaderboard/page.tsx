@@ -28,7 +28,8 @@ const getLeaderboardData = async (type?: LeaderboardType) => {
         ),
       )
       .orderBy(desc(tests.wpm))
-      .leftJoin(users, eq(tests.userId, users.id));
+      .leftJoin(users, eq(tests.userId, users.id))
+      .limit(10);
   } else {
     data = await db
       .select()
@@ -40,7 +41,8 @@ const getLeaderboardData = async (type?: LeaderboardType) => {
         ),
       )
       .orderBy(desc(tests.wpm))
-      .leftJoin(users, eq(tests.userId, users.id));
+      .leftJoin(users, eq(tests.userId, users.id))
+      .limit(10);
   }
 
   const dataTimer60 = data.filter((result) => result.test.amount === 60);
@@ -70,6 +72,7 @@ export default async function LeaderboardPage({
           </div>
           <LeaderboardTable data={data.dataTimer60} />
         </div>
+        <div className="h-[1px] w-full bg-border lg:hidden" />
         <div className="w-full space-y-2">
           <div className="flex items-center justify-between">
             <h4 className="font-heading text-lg font-medium">Time 15</h4>

@@ -21,7 +21,7 @@ export const LeaderboardHeading = () => {
       <h2 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
         {activeLeaderboard} Leaderboard
       </h2>
-      <div className="flex items-center gap-2">
+      <div className="flex w-fit items-center gap-1 rounded-md bg-accent p-0.5">
         {leaderboards.map((current) => (
           <Button
             onClick={() => {
