@@ -7,7 +7,6 @@ import GoogleProvider from "next-auth/providers/google";
 import { users } from "@/db/schema";
 
 export const authOptions: NextAuthOptions = {
-  // @ts-expect-error FIXME:
   adapter: DrizzleAdapter(db),
   session: {
     strategy: "jwt",
