@@ -1,4 +1,5 @@
 import type { AdapterAccount } from "@auth/core/adapters";
+import { InferModel } from "drizzle-orm";
 import {
   index,
   integer,
@@ -77,3 +78,6 @@ export const tests = pgTable(
     userIdIdx: index("user_id_idx").on(test.userId),
   }),
 );
+
+export type Test = InferModel<typeof tests>;
+export type User = InferModel<typeof users>;
