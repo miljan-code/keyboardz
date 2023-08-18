@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth";
 import { siteConfig } from "@/config/site";
 import { AuthButton } from "@/components/auth/auth-button";
 import { Icons } from "@/components/icons";
+import { MobileMenu } from "@/components/mobile-menu";
 
 export const Header = async () => {
   const session = await getSession();
@@ -25,7 +26,7 @@ export const Header = async () => {
           </Link>
         ))}
       </nav>
-      <div className="flex gap-6">
+      <div className="hidden gap-6 md:flex">
         {session ? (
           <Link
             href="/profile"
@@ -37,6 +38,7 @@ export const Header = async () => {
         ) : null}
         <AuthButton session={session} />
       </div>
+      <MobileMenu session={session} />
     </header>
   );
 };

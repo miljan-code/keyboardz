@@ -20,4 +20,5 @@ export type SiteConfig = {
     github: string;
   };
   nav: NavItem[];
+  mobileMenu: NavItem[];
 };

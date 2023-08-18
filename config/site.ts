@@ -1,4 +1,19 @@
-import type { SiteConfig } from "@/types";
+import type { NavItem, SiteConfig } from "@/types";
+
+const nav: NavItem[] = [
+  {
+    title: "Leaderboard",
+    href: "/leaderboard",
+  },
+  {
+    title: "Lobby",
+    href: "/lobby",
+  },
+  {
+    title: "Settings",
+    href: "/settings",
+  },
+];
 
 export const siteConfig: SiteConfig = {
   name: "Keyboardz",
@@ -10,18 +25,16 @@ export const siteConfig: SiteConfig = {
   links: {
     github: "https://github.com/miljan-code/keyboardz",
   },
-  nav: [
+  nav,
+  mobileMenu: [
     {
-      title: "Leaderboard",
-      href: "/leaderboard",
+      title: "Practice",
+      href: "/",
     },
+    ...nav,
     {
-      title: "Lobby",
-      href: "/lobby",
-    },
-    {
-      title: "Settings",
-      href: "/settings",
+      title: "Profile",
+      href: "/profile",
     },
   ],
 };
