@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { and, desc, eq } from "drizzle-orm";
 
 import { getSession } from "@/lib/auth";
-import { formatDate } from "@/lib/utils";
+import { formatDate, getMaxResults } from "@/lib/utils";
 import { tests, users } from "@/db/schema";
 import { WpmStatsBox } from "@/components/profile/wpm-stats-box";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -35,7 +35,15 @@ const getProfilePageData = async () => {
 
   const bestScore = leaderboardData[leaderboardRank].wpm;
 
-  return { user: userDataAndTests, rank: leaderboardRank + 1, bestScore };
+  const [timerScores, wordScores] = getMaxResults(userDataAndTests.tests);
+
+  return {
+    user: userDataAndTests,
+    rank: leaderboardRank + 1,
+    bestScore,
+    timerScores,
+    wordScores,
+  };
 };
 
 export default async function ProfilePage() {
@@ -83,9 +91,9 @@ export default async function ProfilePage() {
           </div>
         </div>
       </Card>
-      <div className="flex gap-6">
-        <WpmStatsBox />
-        <WpmStatsBox />
+      <div className="flex flex-col gap-10 md:flex-row md:gap-6">
+        <WpmStatsBox data={data.timerScores} />
+        <WpmStatsBox data={data.wordScores} />
       </div>
     </section>
   );
