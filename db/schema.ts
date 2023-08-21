@@ -1,5 +1,5 @@
 import type { AdapterAccount } from "@auth/core/adapters";
-import { InferModel } from "drizzle-orm";
+import { InferModel, relations } from "drizzle-orm";
 import {
   index,
   integer,
@@ -16,6 +16,8 @@ export const users = pgTable("user", {
   email: text("email").notNull(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const accounts = pgTable(
@@ -78,6 +80,17 @@ export const tests = pgTable(
     userIdIdx: index("user_id_idx").on(test.userId),
   }),
 );
+
+export const usersRelations = relations(users, ({ many }) => ({
+  tests: many(tests),
+}));
+
+export const testsRelations = relations(tests, ({ one }) => ({
+  user: one(users, {
+    fields: [tests.userId],
+    references: [users.id],
+  }),
+}));
 
 export type Test = InferModel<typeof tests>;
 export type User = InferModel<typeof users>;
