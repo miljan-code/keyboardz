@@ -5,6 +5,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
 import { tests, users } from "@/db/schema";
+import { WpmStatsBox } from "@/components/profile/wpm-stats-box";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 
@@ -19,6 +20,8 @@ const getProfilePageData = async () => {
       tests: true,
     },
   });
+
+  if (!userDataAndTests) return null;
 
   const leaderboardData = await db
     .select()
@@ -41,8 +44,8 @@ export default async function ProfilePage() {
   if (!data || !data.user) return redirect("/");
 
   return (
-    <section>
-      <Card className="grid grid-cols-[1fr_auto]">
+    <section className="space-y-10">
+      <Card className="flex flex-col md:grid md:grid-cols-[1fr_auto]">
         <div className="flex items-center gap-4 border-r px-6 py-4">
           <Avatar className="h-15 w-15">
             <AvatarImage src={data.user.image || ""} />
@@ -54,30 +57,36 @@ export default async function ProfilePage() {
             </span>
           </div>
         </div>
-        <div className="flex w-full justify-between">
-          <div className="flex w-40 flex-col items-center justify-center border-r">
-            <span>WPM</span>
-            <span className="text-6xl font-bold text-primary">
+        <div className="flex w-full justify-between sm:max-md:px-4">
+          <div className="flex flex-col items-center justify-center max-md:p-4 md:border-r md:max-lg:px-6 lg:w-40">
+            <span className="text-sm sm:text-base">WPM</span>
+            <span className="text-4xl font-bold text-primary sm:text-6xl">
               {data.bestScore}
             </span>
             <span className="text-xs text-muted-foreground">best score</span>
           </div>
-          <div className="flex w-40 flex-col items-center justify-center border-r">
-            <span>Tests</span>
-            <span className="text-6xl font-bold text-primary">
+          <div className="flex flex-col items-center justify-center max-md:p-4 md:border-r md:max-lg:px-6 lg:w-40">
+            <span className="text-sm sm:text-base">Tests</span>
+            <span className="text-4xl font-bold text-primary sm:text-6xl">
               {data.user.tests.length}
             </span>
             <span className="text-xs text-muted-foreground">completed</span>
           </div>
-          <div className="flex w-40 flex-col items-center justify-center">
-            <span>Rank</span>
-            <span className="text-6xl font-bold text-primary">{data.rank}</span>
+          <div className="flex flex-col items-center justify-center max-md:p-4 md:max-lg:px-6 lg:w-40">
+            <span className="text-sm sm:text-base">Rank</span>
+            <span className="text-4xl font-bold text-primary sm:text-6xl">
+              {data.rank}
+            </span>
             <span className="text-xs text-muted-foreground">
               on leaderboard
             </span>
           </div>
         </div>
       </Card>
+      <div className="flex gap-6">
+        <WpmStatsBox />
+        <WpmStatsBox />
+      </div>
     </section>
   );
 }

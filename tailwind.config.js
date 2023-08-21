@@ -60,61 +60,60 @@ module.exports = {
         },
         tremor: {
           brand: {
-            faint: "#eff6ff", // blue-50
-            muted: "#bfdbfe", // blue-200
-            subtle: "#60a5fa", // blue-400
-            DEFAULT: "#3b82f6", // blue-500
-            emphasis: "#1d4ed8", // blue-700
-            inverted: "#ffffff", // white
+            faint: "#eff6ff",
+            muted: "#bfdbfe",
+            subtle: "#60a5fa",
+            DEFAULT: "#3b82f6",
+            emphasis: "#1d4ed8",
+            inverted: "#ffffff",
           },
           background: {
-            muted: "#f9fafb", // gray-50
-            subtle: "#f3f4f6", // gray-100
-            DEFAULT: "#ffffff", // white
-            emphasis: "#374151", // gray-700
+            muted: "#f9fafb",
+            subtle: "#f3f4f6",
+            DEFAULT: "#ffffff",
+            emphasis: "#374151",
           },
           border: {
-            DEFAULT: "#e5e7eb", // gray-200
+            DEFAULT: "#e5e7eb",
           },
           ring: {
-            DEFAULT: "#e5e7eb", // gray-200
+            DEFAULT: "#e5e7eb",
           },
           content: {
-            subtle: "#9ca3af", // gray-400
-            DEFAULT: "#6b7280", // gray-500
-            emphasis: "#374151", // gray-700
-            strong: "#111827", // gray-900
-            inverted: "#ffffff", // white
+            subtle: "#9ca3af",
+            DEFAULT: "#6b7280",
+            emphasis: "#374151",
+            strong: "#111827",
+            inverted: "#ffffff",
           },
         },
-        // dark mode
         "dark-tremor": {
           brand: {
-            faint: "#0B1229", // custom
-            muted: "#172554", // blue-950
-            subtle: "#1e40af", // blue-800
-            DEFAULT: "#3b82f6", // blue-500
-            emphasis: "#60a5fa", // blue-400
-            inverted: "#030712", // gray-950
+            faint: "#0B1229",
+            muted: "#172554",
+            subtle: "#1e40af",
+            DEFAULT: "#3b82f6",
+            emphasis: "#60a5fa",
+            inverted: "#030712",
           },
           background: {
-            muted: "#131A2B", // custom
-            subtle: "#1f2937", // gray-800
-            DEFAULT: "#111827", // gray-900
-            emphasis: "#d1d5db", // gray-300
+            muted: "#131A2B",
+            subtle: "#1f2937",
+            DEFAULT: "#111827",
+            emphasis: "#d1d5db",
           },
           border: {
-            DEFAULT: "#1f293700", // gray-800
+            DEFAULT: "#1f293700",
           },
           ring: {
-            DEFAULT: "#1f2937", // gray-800
+            DEFAULT: "#1f2937",
           },
           content: {
-            subtle: "#4b5563", // gray-600
-            DEFAULT: "#6b7280", // gray-600
-            emphasis: "#e5e7eb", // gray-200
-            strong: "#f9fafb", // gray-50
-            inverted: "#000000", // black
+            subtle: "#4b5563",
+            DEFAULT: "#6b7280",
+            emphasis: "#e5e7eb",
+            strong: "#f9fafb",
+            inverted: "#000000",
           },
         },
       },
@@ -124,7 +123,6 @@ module.exports = {
           "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
         "tremor-dropdown":
           "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-        // dark
         "dark-tremor-input": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
         "dark-tremor-card":
           "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
@@ -138,6 +136,10 @@ module.exports = {
         "tremor-small": "0.375rem",
         "tremor-default": "0.5rem",
         "tremor-full": "9999px",
+      },
+      backgroundImage: {
+        "card-gradient":
+          "linear-gradient(90deg,rgba(255,255,255,0) 0%, hsl(var(--primary)) 50%, rgba(0,255,0,0) 100%);",
       },
       fontSize: {
         "tremor-label": ["0.75rem"],
