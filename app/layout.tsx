@@ -84,7 +84,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             "dark font-sans antialiased",
           )}
         >
-          <main className="mx-auto grid min-h-screen max-w-7xl grid-flow-row grid-rows-[auto_1fr_auto] gap-6 px-8 py-6">
+          <main className="mx-auto grid min-h-screen max-w-7xl grid-flow-row grid-rows-[auto_1fr_auto] gap-6 px-8 py-6 md:gap-12">
             <Header />
             {children}
             <Footer />

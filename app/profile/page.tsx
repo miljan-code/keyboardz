@@ -1,26 +1,83 @@
+import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import { getSession } from "@/lib/auth";
-import { users } from "@/db/schema";
+import { formatDate } from "@/lib/utils";
+import { tests, users } from "@/db/schema";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 
-const getCurrentUser = async () => {
+const getProfilePageData = async () => {
   const session = await getSession();
 
   if (!session) return null;
 
-  const currentUser = await db.query.users.findFirst({
+  const userDataAndTests = await db.query.users.findFirst({
     where: eq(users.id, session.user.id),
     with: {
       tests: true,
     },
   });
 
-  return currentUser;
+  const leaderboardData = await db
+    .select()
+    .from(tests)
+    .where(and(eq(tests.mode, "timer"), eq(tests.amount, 60)))
+    .orderBy(desc(tests.wpm));
+
+  const leaderboardRank = leaderboardData.findIndex(
+    (result) => result.userId === session.user.id,
+  );
+
+  const bestScore = leaderboardData[leaderboardRank].wpm;
+
+  return { user: userDataAndTests, rank: leaderboardRank + 1, bestScore };
 };
 
 export default async function ProfilePage() {
-  const currentUser = await getCurrentUser();
+  const data = await getProfilePageData();
 
-  return <div className=""></div>;
+  if (!data || !data.user) return redirect("/");
+
+  return (
+    <section>
+      <Card className="grid grid-cols-[1fr_auto]">
+        <div className="flex items-center gap-4 border-r px-6 py-4">
+          <Avatar className="h-15 w-15">
+            <AvatarImage src={data.user.image || ""} />
+          </Avatar>
+          <div className="flex flex-col">
+            <h3 className="font-heading text-3xl">{data.user.name}</h3>
+            <span className="text-sm text-muted-foreground">
+              Joined {formatDate(data.user.created_at)}
+            </span>
+          </div>
+        </div>
+        <div className="flex w-full justify-between">
+          <div className="flex w-40 flex-col items-center justify-center border-r">
+            <span>WPM</span>
+            <span className="text-6xl font-bold text-primary">
+              {data.bestScore}
+            </span>
+            <span className="text-xs text-muted-foreground">best score</span>
+          </div>
+          <div className="flex w-40 flex-col items-center justify-center border-r">
+            <span>Tests</span>
+            <span className="text-6xl font-bold text-primary">
+              {data.user.tests.length}
+            </span>
+            <span className="text-xs text-muted-foreground">completed</span>
+          </div>
+          <div className="flex w-40 flex-col items-center justify-center">
+            <span>Rank</span>
+            <span className="text-6xl font-bold text-primary">{data.rank}</span>
+            <span className="text-xs text-muted-foreground">
+              on leaderboard
+            </span>
+          </div>
+        </div>
+      </Card>
+    </section>
+  );
 }

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import type { ReturningDataType } from "@/app/leaderboard/page";
-import { format } from "date-fns";
 
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -55,7 +54,7 @@ export const LeaderboardTable = ({ data }: LeaderboardTableProps) => {
               {row.test.accuracy}%
             </TableCell>
             <TableCell className="hidden text-right sm:table-cell">
-              {format(row.test.created_at, "dd. MMM yyyy")}
+              {formatDate(row.test.created_at)}
             </TableCell>
           </TableRow>
         ))}
