@@ -5,6 +5,9 @@ import { and, desc, eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { formatDate, getMaxResults } from "@/lib/utils";
 import { tests, users } from "@/db/schema";
+import { CopyLinkButton } from "@/components/profile/copy-link-button";
+import { EditProfile } from "@/components/profile/edit-profile";
+import { Wpm30dayChart } from "@/components/profile/wpm-30day-chart";
 import { WpmStatsBox } from "@/components/profile/wpm-stats-box";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
@@ -49,10 +52,10 @@ const getProfilePageData = async () => {
 export default async function ProfilePage() {
   const data = await getProfilePageData();
 
-  if (!data || !data.user) return redirect("/");
+  if (!data) return redirect("/");
 
   return (
-    <section className="space-y-10">
+    <section className="flex flex-col justify-center space-y-10 max-md:mt-10">
       <Card className="flex flex-col md:grid md:grid-cols-[1fr_auto]">
         <div className="flex items-center gap-4 border-r px-6 py-4">
           <Avatar className="h-15 w-15">
@@ -63,6 +66,10 @@ export default async function ProfilePage() {
             <span className="text-sm text-muted-foreground">
               Joined {formatDate(data.user.created_at)}
             </span>
+          </div>
+          <div className="ml-auto flex flex-col gap-2">
+            <EditProfile />
+            <CopyLinkButton userId={data.user.id} />
           </div>
         </div>
         <div className="flex w-full justify-between sm:max-md:px-4">
@@ -95,6 +102,7 @@ export default async function ProfilePage() {
         <WpmStatsBox data={data.timerScores} />
         <WpmStatsBox data={data.wordScores} />
       </div>
+      <Wpm30dayChart />
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { and, desc, eq, gte, or } from "drizzle-orm";
 
+import { daysAgo } from "@/lib/utils";
 import { tests, User, users, type Test } from "@/db/schema";
 import {
   LeaderboardHeading,
@@ -24,7 +25,7 @@ const getLeaderboardData = async (type?: LeaderboardType) => {
         and(
           eq(tests.mode, "timer"),
           or(eq(tests.amount, 60), eq(tests.amount, 15)),
-          gte(tests.created_at, new Date(new Date().getTime() - 86400000)),
+          gte(tests.created_at, daysAgo(1)),
         ),
       )
       .orderBy(desc(tests.wpm))

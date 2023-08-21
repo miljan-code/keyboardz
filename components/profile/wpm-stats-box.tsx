@@ -17,7 +17,7 @@ export const WpmStatsBox = ({ data }: WpmStatsBoxProps) => {
             {"wpm" in result ? result.wpm : "—"}
           </span>
           <span className="text-sm text-foreground/60">
-            {"accuracy" in result ? result.accuracy : "—"}
+            {"accuracy" in result ? `${result.accuracy}%` : "—"}
           </span>
         </div>
       ))}

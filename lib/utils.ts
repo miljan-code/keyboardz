@@ -44,3 +44,7 @@ export function getMaxResults(tests: Test[]) {
     });
   });
 }
+
+export function daysAgo(days: number) {
+  return new Date(new Date().getTime() - days * 86400000);
+}
