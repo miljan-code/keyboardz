@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const leaderboards = ["All-Time", "Weekly"] as const;
@@ -21,7 +22,7 @@ export const LeaderboardHeading = () => {
       <h2 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
         {activeLeaderboard} Leaderboard
       </h2>
-      <div className="flex w-fit items-center gap-1 rounded-md bg-accent p-0.5">
+      <div className="flex w-fit items-center gap-1 rounded-md p-0.5">
         {leaderboards.map((current) => (
           <Button
             onClick={() => {
@@ -29,8 +30,14 @@ export const LeaderboardHeading = () => {
               router.replace(`/leaderboard?type=${current}`);
             }}
             key={current}
-            variant={current === activeLeaderboard ? "default" : "outline"}
+            variant="outline"
             size="sm"
+            className={cn(
+              "transition-colors hover:border hover:border-primary",
+              {
+                "border border-primary": activeLeaderboard === current,
+              },
+            )}
           >
             {current}
           </Button>

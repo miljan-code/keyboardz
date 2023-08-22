@@ -3,6 +3,7 @@ import {
   GitFork,
   Languages,
   Lock,
+  LogOut,
   Menu,
   MousePointer,
   Timer,
@@ -21,6 +22,7 @@ export const Icons = {
   lock: Lock,
   menu: Menu,
   close: X,
+  logout: LogOut,
   logo: ({ ...props }: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"

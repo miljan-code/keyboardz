@@ -3,6 +3,7 @@
 import type { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 
+import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 
 interface AuthButtonProps {
@@ -18,8 +19,8 @@ export const AuthButton = ({ session }: AuthButtonProps) => {
     );
 
   return (
-    <Button variant="secondary" size="sm" onClick={() => signOut()}>
-      Sign Out
+    <Button variant="ghost" size="sm" onClick={() => signOut()}>
+      <Icons.logout size={16} className="text-foreground/80" />
     </Button>
   );
 };
