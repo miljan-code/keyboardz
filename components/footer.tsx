@@ -3,7 +3,7 @@ import { Icons } from "@/components/icons";
 
 export const Footer = () => {
   return (
-    <footer className="space-y-4 text-sm">
+    <footer className="space-y-4 px-8 py-6 text-sm">
       <div className="flex items-center justify-between">
         <a
           href={siteConfig.links.github}

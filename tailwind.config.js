@@ -128,6 +128,7 @@ module.exports = {
           "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
         "dark-tremor-dropdown":
           "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        "bg-primary": "hsl(var(--primary) / 0.025) 0px 0px 150px 100px",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -139,7 +140,9 @@ module.exports = {
       },
       backgroundImage: {
         "card-gradient":
-          "linear-gradient(90deg,rgba(255,255,255,0) 0%, hsl(var(--primary)) 50%, rgba(0,255,0,0) 100%);",
+          "linear-gradient(90deg,rgba(255,255,255,0) 0%, hsl(var(--primary) / 0.75) 50%, rgba(0,255,0,0) 100%);",
+        "header-separator":
+          "linear-gradient(90deg,rgba(255,255,255,0) 0%, hsl(var(--border)) 50%, rgba(0,255,0,0) 100%);",
       },
       fontSize: {
         "tremor-label": ["0.75rem"],

@@ -24,19 +24,21 @@ export default async function ProfilePage() {
   if (!data) return redirect("/");
 
   return (
-    <section className="flex flex-col justify-center space-y-10 max-md:mt-10">
+    <section className="flex flex-col justify-center space-y-10 px-8 max-md:mt-10">
       <Card className="flex flex-col md:grid md:grid-cols-[1fr_auto]">
-        <div className="flex items-center gap-4 border-r px-6 py-4">
-          <Avatar className="h-15 w-15">
+        <div className="flex flex-wrap items-center gap-4 border-r px-6 py-4 md:flex-nowrap">
+          <Avatar className="h-16 w-16 sm:h-24 sm:w-24">
             <AvatarImage src={data.user.image || ""} />
           </Avatar>
           <div className="flex flex-col">
-            <h3 className="font-heading text-3xl">{data.user.name}</h3>
+            <h3 className="truncate font-heading text-2xl sm:text-3xl">
+              {data.user.name}
+            </h3>
             <span className="text-sm text-muted-foreground">
               Joined {formatDate(data.user.created_at)}
             </span>
           </div>
-          <div className="ml-auto flex flex-col gap-2">
+          <div className="flex gap-2 md:ml-auto md:flex-col">
             <EditProfile />
             <CopyLinkButton userId={data.user.id} />
           </div>

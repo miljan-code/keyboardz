@@ -24,7 +24,9 @@ export const LeaderboardTable = ({ data }: LeaderboardTableProps) => {
           <TableRow className="text-xs">
             <TableHead>#</TableHead>
             <TableHead>Name</TableHead>
-            <TableHead className="max-sm:text-right">WPM</TableHead>
+            <TableHead className="text-primary max-sm:text-right">
+              WPM
+            </TableHead>
             <TableHead className="hidden sm:table-cell">Raw WPM</TableHead>
             <TableHead className="hidden sm:table-cell">Accuracy</TableHead>
             <TableHead className="hidden text-right sm:table-cell">
@@ -47,7 +49,7 @@ export const LeaderboardTable = ({ data }: LeaderboardTableProps) => {
                 </Avatar>
                 <Link href={`/profile/${row.user?.id}`}>{row.user?.name}</Link>
               </TableCell>
-              <TableCell className="max-sm:text-right">
+              <TableCell className="text-primary max-sm:text-right">
                 {row.test.wpm}
               </TableCell>
               <TableCell className="hidden sm:table-cell">
@@ -56,7 +58,7 @@ export const LeaderboardTable = ({ data }: LeaderboardTableProps) => {
               <TableCell className="hidden sm:table-cell">
                 {row.test.accuracy}%
               </TableCell>
-              <TableCell className="hidden text-right sm:table-cell">
+              <TableCell className="hidden text-right text-foreground/80 sm:table-cell">
                 {formatDate(row.test.created_at)}
               </TableCell>
             </TableRow>

@@ -28,15 +28,17 @@ export default async function UserPage({ params }: UserPageProps) {
   if (!data) redirect("/");
 
   return (
-    <section className="flex flex-col justify-center space-y-10 max-md:mt-10">
+    <section className="flex flex-col justify-center space-y-10 px-8 max-md:mt-10">
       <Card className="flex flex-col md:grid md:grid-cols-[1fr_auto]">
         <div className="flex items-center gap-4 border-r px-6 py-4">
-          <Avatar className="h-15 w-15">
+          <Avatar className="h-16 w-16 sm:h-24 sm:w-24">
             <AvatarImage src={data.user.image || ""} />
           </Avatar>
           <div className="flex flex-col">
-            <h3 className="font-heading text-3xl">{data.user.name}</h3>
-            <span className="text-sm text-muted-foreground">
+            <h3 className="truncate font-heading text-xl sm:text-3xl">
+              {data.user.name}
+            </h3>
+            <span className="text-xs text-muted-foreground sm:text-sm">
               Joined {formatDate(data.user.created_at)}
             </span>
           </div>

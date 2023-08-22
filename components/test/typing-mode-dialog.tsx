@@ -70,7 +70,11 @@ export const TypingModeDialog = () => {
         onOpenChange={(isOpen) => setIsModalOpen(isOpen)}
       >
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            className="relative before:absolute before:left-0 before:top-0 before:h-[1px] before:w-full before:bg-card-gradient after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:bg-card-gradient"
+          >
             Typing Mode
           </Button>
         </DialogTrigger>
