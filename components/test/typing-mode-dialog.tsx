@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { testModeAtom } from "@/lib/atoms";
 import { cn } from "@/lib/utils";
 import { testModeFormSchema } from "@/lib/validations/test-mode-schema";
-import { amounts } from "@/config/leaderboard";
+import { leaderboardCategories } from "@/config/leaderboard";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,7 +48,9 @@ export const TypingModeDialog = () => {
   const mode = form.watch("mode");
   const formAmount = form.watch("amount");
 
-  const [activeMode] = amounts.filter((amount) => amount.mode === mode);
+  const [activeMode] = leaderboardCategories.filter(
+    (amount) => amount.mode === mode,
+  );
 
   const { isModalOpen, setIsModalOpen } = useModal();
 

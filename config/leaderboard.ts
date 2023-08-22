@@ -1,7 +1,9 @@
-export const amounts: {
+export interface LeaderbaordCategory {
   mode: "timer" | "words";
   amounts: number[];
-}[] = [
+}
+
+export const leaderboardCategories: LeaderbaordCategory[] = [
   {
     mode: "timer",
     amounts: [15, 30, 60, 120],

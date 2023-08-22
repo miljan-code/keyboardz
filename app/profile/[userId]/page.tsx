@@ -1,27 +1,31 @@
 import { redirect } from "next/navigation";
+import { db } from "@/db";
 
-import { getSession } from "@/lib/auth";
 import { getUserStats } from "@/lib/queries";
 import { formatDate } from "@/lib/utils";
-import { CopyLinkButton } from "@/components/profile/copy-link-button";
-import { EditProfile } from "@/components/profile/edit-profile";
-import { Wpm30dayChart } from "@/components/profile/wpm-30day-chart";
+import { users, type User } from "@/db/schema";
 import { WpmStatsBox } from "@/components/profile/wpm-stats-box";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 
-const getCurrentUserStats = async () => {
-  const session = await getSession();
+interface UserPageProps {
+  params: { userId: User["id"] };
+}
 
-  if (!session) return null;
+export const generateStaticParams = async () => {
+  const usersArr = await db.select().from(users).limit(100);
 
-  return await getUserStats(session.user.id);
+  return usersArr.map((user) => ({
+    userId: user.id,
+  }));
 };
 
-export default async function ProfilePage() {
-  const data = await getCurrentUserStats();
+export default async function UserPage({ params }: UserPageProps) {
+  const { userId } = params;
 
-  if (!data) return redirect("/");
+  const data = await getUserStats(userId);
+
+  if (!data) redirect("/");
 
   return (
     <section className="flex flex-col justify-center space-y-10 max-md:mt-10">
@@ -35,10 +39,6 @@ export default async function ProfilePage() {
             <span className="text-sm text-muted-foreground">
               Joined {formatDate(data.user.created_at)}
             </span>
-          </div>
-          <div className="ml-auto flex flex-col gap-2">
-            <EditProfile />
-            <CopyLinkButton userId={data.user.id} />
           </div>
         </div>
         <div className="flex w-full justify-between sm:max-md:px-4">
@@ -71,7 +71,6 @@ export default async function ProfilePage() {
         <WpmStatsBox data={data.timerScores} />
         <WpmStatsBox data={data.wordScores} />
       </div>
-      <Wpm30dayChart />
     </section>
   );
 }
