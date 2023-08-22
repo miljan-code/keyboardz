@@ -1,53 +1,27 @@
-import { db } from "@/db";
-import { and, desc, eq, gte, or } from "drizzle-orm";
-
-import { daysAgo } from "@/lib/utils";
-import { tests, User, users, type Test } from "@/db/schema";
+import { getAllTimeLeaderboard, getWeeklyLeaderboard } from "@/lib/queries";
+import { User, type Test } from "@/db/schema";
 import {
   LeaderboardHeading,
   type LeaderboardType,
 } from "@/components/leaderboard/leaderboard-heading";
 import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
 
-export type ReturningDataType = {
+export type TestWithUser = {
   test: Test;
   user: User | null;
 };
 
 const getLeaderboardData = async (type?: LeaderboardType) => {
-  let data: ReturningDataType[] = [];
+  let dataTimer60,
+    dataTimer15: TestWithUser[] = [];
 
-  if (type === "Daily") {
-    data = await db
-      .select()
-      .from(tests)
-      .where(
-        and(
-          eq(tests.mode, "timer"),
-          or(eq(tests.amount, 60), eq(tests.amount, 15)),
-          gte(tests.created_at, daysAgo(1)),
-        ),
-      )
-      .orderBy(desc(tests.wpm))
-      .leftJoin(users, eq(tests.userId, users.id))
-      .limit(10);
+  if (type === "Weekly") {
+    dataTimer60 = await getWeeklyLeaderboard(60);
+    dataTimer15 = await getWeeklyLeaderboard(15);
   } else {
-    data = await db
-      .select()
-      .from(tests)
-      .where(
-        and(
-          eq(tests.mode, "timer"),
-          or(eq(tests.amount, 60), eq(tests.amount, 15)),
-        ),
-      )
-      .orderBy(desc(tests.wpm))
-      .leftJoin(users, eq(tests.userId, users.id))
-      .limit(10);
+    dataTimer60 = await getAllTimeLeaderboard(60);
+    dataTimer15 = await getAllTimeLeaderboard(15);
   }
-
-  const dataTimer60 = data.filter((result) => result.test.amount === 60);
-  const dataTimer15 = data.filter((result) => result.test.amount === 15);
 
   return { dataTimer60, dataTimer15 };
 };

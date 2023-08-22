@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
 import type { Test } from "@/db/schema";
+import { amounts } from "@/config/leaderboard";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -13,17 +14,6 @@ export function formatDate(date: Date) {
 }
 
 export function getMaxResults(tests: Test[]) {
-  const amounts = [
-    {
-      mode: "timer",
-      amounts: [15, 30, 60, 120],
-    },
-    {
-      mode: "words",
-      amounts: [10, 25, 50, 100],
-    },
-  ];
-
   return amounts.map((innerAmounts) => {
     return innerAmounts.amounts.map((amount) => {
       const resultsForAmount = tests.filter(

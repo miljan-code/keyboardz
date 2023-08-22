@@ -6,7 +6,9 @@ import { useAtom } from "jotai";
 import { useForm } from "react-hook-form";
 
 import { testModeAtom } from "@/lib/atoms";
+import { cn } from "@/lib/utils";
 import { testModeFormSchema } from "@/lib/validations/test-mode-schema";
+import { amounts } from "@/config/leaderboard";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,12 +46,19 @@ export const TypingModeDialog = () => {
   });
 
   const mode = form.watch("mode");
+  const formAmount = form.watch("amount");
+
+  const [activeMode] = amounts.filter((amount) => amount.mode === mode);
 
   const { isModalOpen, setIsModalOpen } = useModal();
 
   const onSubmit = (values: TestMode) => {
     setIsModalOpen(false);
     setTestMode(values);
+  };
+
+  const handleAmountChange = (amount: number) => {
+    form.setValue("amount", amount);
   };
 
   return (
@@ -102,6 +111,22 @@ export const TypingModeDialog = () => {
                   </FormItem>
                 )}
               />
+              <div className="flex gap-0.5 overflow-hidden rounded-md border bg-muted">
+                {activeMode.amounts.map((amount) => (
+                  <div
+                    key={amount}
+                    onClick={() => handleAmountChange(amount)}
+                    className={cn(
+                      "flex-1 cursor-pointer bg-background py-1 text-center text-sm transition-colors hover:bg-primary hover:text-background",
+                      {
+                        "bg-primary text-background": amount === formAmount,
+                      },
+                    )}
+                  >
+                    {amount}
+                  </div>
+                ))}
+              </div>
               <FormField
                 control={form.control}
                 name="amount"
