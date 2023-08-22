@@ -10,7 +10,7 @@ export const Header = async () => {
   const session = await getSession();
 
   return (
-    <header className="after:bg-header-separator relative flex justify-between px-8 py-4 after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full md:grid md:grid-cols-[auto_1fr_auto] md:gap-10">
+    <header className="after:bg-header-separator sticky top-0 z-50 flex justify-between bg-background px-8 py-4 after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full md:grid md:grid-cols-[auto_1fr_auto] md:gap-10">
       <Link href="/" className="flex items-center gap-2">
         <Icons.logo className="-mt-0.5" />
         <span className="font-bold">{siteConfig.name}</span>

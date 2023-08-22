@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLockBody } from "@/hooks/use-lock-body";
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 
@@ -18,6 +19,8 @@ export const MobileMenu = ({ session }: MobileMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const pathname = usePathname();
+
+  useLockBody(isMenuOpen);
 
   useEffect(() => {
     setIsMenuOpen(false);
