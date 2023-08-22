@@ -50,10 +50,35 @@
 }
 
 @layer base {
+  :root {
+    color-scheme: dark;
+  }
+
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
+  ::-webkit-scrollbar {
+    @apply w-3;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-md bg-[#4e535a];
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary;
+  }
+}
+
+.scrollbar-sm::-webkit-scrollbar {
+  @apply w-1.5;
 }
