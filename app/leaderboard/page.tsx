@@ -38,9 +38,9 @@ export default async function LeaderboardPage({
   const data = await getLeaderboardData(searchParams.type);
 
   return (
-    <section className="mt-4 space-y-6">
+    <section className="mt-4 space-y-6 px-8">
       <LeaderboardHeading />
-      <div className="flex flex-col gap-4 lg:flex-row">
+      <div className="flex flex-col gap-8 lg:flex-row lg:gap-4">
         <div className="w-full space-y-2">
           <div className="flex items-center justify-between">
             <h4 className="border-b-2 border-foreground/80 font-heading text-lg font-medium text-foreground/80">
