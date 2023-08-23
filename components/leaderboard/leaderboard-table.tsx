@@ -75,7 +75,9 @@ export const LeaderboardTable = ({
         e.currentTarget.scrollTop <=
       10;
 
-    if (isScrolled && hasNextPage) fetchNextPage();
+    if (isScrolled && hasNextPage) {
+      fetchNextPage();
+    }
   };
 
   return (

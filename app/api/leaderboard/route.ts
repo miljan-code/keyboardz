@@ -10,8 +10,8 @@ export async function GET(req: NextRequest) {
   const time = Number(req.nextUrl.searchParams.get("time")) || 60;
   const page = Number(req.nextUrl.searchParams.get("page")) || 1;
 
-  const limit = LIMIT_PER_PAGE * page;
-  const offset = (LIMIT_PER_PAGE + 1) * (page - 1);
+  const limit = LIMIT_PER_PAGE;
+  const offset = LIMIT_PER_PAGE * (page - 1);
 
   const data = await getLeaderboard(time, type, limit, offset);
 
