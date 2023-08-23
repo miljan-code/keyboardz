@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const leaderboards = ["All-Time", "Weekly"] as const;
+export const leaderboards = ["All-Time", "Weekly"] as const;
 
 export type LeaderboardType = (typeof leaderboards)[number];
 

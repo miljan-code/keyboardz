@@ -39,7 +39,7 @@ export default async function UserPage({ params }: UserPageProps) {
               {data.user.name}
             </h3>
             <span className="text-xs text-muted-foreground sm:text-sm">
-              Joined {formatDate(data.user.created_at)}
+              Joined {formatDate(data.user.createdAt)}
             </span>
           </div>
         </div>

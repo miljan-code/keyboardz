@@ -35,7 +35,7 @@ export default async function ProfilePage() {
               {data.user.name}
             </h3>
             <span className="text-sm text-muted-foreground">
-              Joined {formatDate(data.user.created_at)}
+              Joined {formatDate(data.user.createdAt)}
             </span>
           </div>
           <div className="flex gap-2 md:ml-auto md:flex-col">

@@ -15,16 +15,16 @@ const get30DayWpmAverage = async () => {
   const results = await db.query.tests.findMany({
     columns: {
       wpm: true,
-      created_at: true,
+      createdAt: true,
     },
     where: and(
       eq(tests.userId, session.user.id),
-      gte(tests.created_at, daysAgo(30)),
+      gte(tests.createdAt, daysAgo(30)),
     ),
   });
 
   const transformedResults = results.map((result) => ({
-    date: format(result.created_at, "dd MMM"),
+    date: format(result.createdAt, "dd MMM"),
     wpm: result.wpm,
   }));
 

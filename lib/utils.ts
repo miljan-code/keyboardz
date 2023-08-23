@@ -11,5 +11,6 @@ export function formatDate(date: Date) {
 }
 
 export function daysAgo(days: number) {
-  return new Date(new Date().getTime() - days * 86400000);
+  if (days < 0) return new Date(0);
+  else return new Date(new Date().getTime() - days * 86400000);
 }
