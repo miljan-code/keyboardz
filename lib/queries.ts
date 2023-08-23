@@ -6,32 +6,46 @@ import { tests, users, type Test, type User } from "@/db/schema";
 import {
   LeaderbaordCategory,
   leaderboardCategories,
+  LIMIT_PER_PAGE,
 } from "@/config/leaderboard";
+import { leaderboards } from "@/components/leaderboard/leaderboard-heading";
 
-export async function getAllTimeLeaderboard(time: number, limit: number = 20) {
-  return await db
-    .select()
-    .from(tests)
-    .where(and(eq(tests.mode, "timer"), eq(tests.amount, time)))
-    .orderBy(desc(tests.wpm))
-    .leftJoin(users, eq(tests.userId, users.id))
-    .limit(limit);
-}
+export async function getLeaderboard(
+  time: number,
+  type: (typeof leaderboards)[number] = "All-Time",
+  limit: number = LIMIT_PER_PAGE,
+  offset: number = 0,
+) {
+  const isWeekly = type === "Weekly";
 
-export async function getWeeklyLeaderboard(time: number, limit: number = 20) {
-  return await db
+  const data = await db
     .select()
     .from(tests)
     .where(
       and(
         eq(tests.mode, "timer"),
         eq(tests.amount, time),
-        gte(tests.created_at, daysAgo(7)),
+        gte(tests.createdAt, daysAgo(isWeekly ? 7 : -1)),
       ),
     )
     .orderBy(desc(tests.wpm))
     .leftJoin(users, eq(tests.userId, users.id))
-    .limit(limit);
+    .limit(limit)
+    .offset(offset);
+
+  return data.map((result) => ({
+    user: result.user
+      ? {
+          ...result.user,
+          createdAt: result.user.createdAt.toString(),
+          updatedAt: result.user.updatedAt.toString(),
+        }
+      : null,
+    test: {
+      ...result.test,
+      createdAt: result.test.createdAt.toString(),
+    },
+  }));
 }
 
 export async function getUserStats(userId: User["id"]) {

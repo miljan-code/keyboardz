@@ -16,8 +16,8 @@ export const users = pgTable("user", {
   email: text("email").notNull(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
-  created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const accounts = pgTable(
@@ -74,7 +74,7 @@ export const tests = pgTable(
     accuracy: integer("accuracy").notNull(),
     mode: text("mode").notNull(),
     amount: integer("amount").notNull(),
-    created_at: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (test) => ({
     userIdIdx: index("user_id_idx").on(test.userId),

@@ -1,30 +1,13 @@
-import { getAllTimeLeaderboard, getWeeklyLeaderboard } from "@/lib/queries";
-import { User, type Test } from "@/db/schema";
+import { db } from "@/db";
+import { and, eq, sql } from "drizzle-orm";
+
+import { getLeaderboard } from "@/lib/queries";
+import { tests } from "@/db/schema";
 import {
   LeaderboardHeading,
   type LeaderboardType,
 } from "@/components/leaderboard/leaderboard-heading";
 import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
-
-export type TestWithUser = {
-  test: Test;
-  user: User | null;
-};
-
-const getLeaderboardData = async (type?: LeaderboardType) => {
-  let dataTimer60,
-    dataTimer15: TestWithUser[] = [];
-
-  if (type === "Weekly") {
-    dataTimer60 = await getWeeklyLeaderboard(60);
-    dataTimer15 = await getWeeklyLeaderboard(15);
-  } else {
-    dataTimer60 = await getAllTimeLeaderboard(60);
-    dataTimer15 = await getAllTimeLeaderboard(15);
-  }
-
-  return { dataTimer60, dataTimer15 };
-};
 
 interface LeaderboardPageProps {
   searchParams: {
@@ -32,10 +15,29 @@ interface LeaderboardPageProps {
   };
 }
 
+const getTotalTests = async () => {
+  const [maxResults15] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(tests)
+    .where(and(eq(tests.mode, "timer"), eq(tests.amount, 15)));
+
+  const [maxResults60] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(tests)
+    .where(and(eq(tests.mode, "timer"), eq(tests.amount, 60)));
+
+  return {
+    maxResults15: maxResults15.count,
+    maxResults60: maxResults60.count,
+  };
+};
+
 export default async function LeaderboardPage({
   searchParams,
 }: LeaderboardPageProps) {
-  const data = await getLeaderboardData(searchParams.type);
+  const dataTimer60 = await getLeaderboard(60, searchParams.type);
+  const dataTimer15 = await getLeaderboard(15, searchParams.type);
+  const { maxResults15, maxResults60 } = await getTotalTests();
 
   return (
     <section className="mt-4 space-y-6 px-8">
@@ -47,7 +49,12 @@ export default async function LeaderboardPage({
               Time 60
             </h4>
           </div>
-          <LeaderboardTable data={data.dataTimer60} />
+          <LeaderboardTable
+            data={dataTimer60}
+            timer={60}
+            type={searchParams.type}
+            maxResults={maxResults60}
+          />
         </div>
         <div className="h-[1px] w-full bg-border lg:hidden" />
         <div className="w-full space-y-2">
@@ -56,7 +63,12 @@ export default async function LeaderboardPage({
               Time 15
             </h4>
           </div>
-          <LeaderboardTable data={data.dataTimer15} />
+          <LeaderboardTable
+            data={dataTimer15}
+            timer={15}
+            type={searchParams.type}
+            maxResults={maxResults15}
+          />
         </div>
       </div>
     </section>

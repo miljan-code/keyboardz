@@ -1,7 +1,15 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import Link from "next/link";
-import type { TestWithUser } from "@/app/leaderboard/page";
+import { useSearchParams } from "next/navigation";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { cn, formatDate } from "@/lib/utils";
+import type { Test, User } from "@/db/schema";
+import { LIMIT_PER_PAGE } from "@/config/leaderboard";
+import type { LeaderboardType } from "@/components/leaderboard/leaderboard-heading";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -10,15 +18,90 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarImage } from "../ui/avatar";
+
+type TestWithUser = {
+  test: Omit<Test, "createdAt"> & {
+    createdAt: string;
+  };
+  user:
+    | (Omit<User, "createdAt" | "updatedAt"> & {
+        createdAt: string;
+        updatedAt: string;
+      })
+    | null;
+};
 
 interface LeaderboardTableProps {
   data: TestWithUser[];
+  timer: number;
+  type: LeaderboardType;
+  maxResults: number;
 }
 
-export const LeaderboardTable = ({ data }: LeaderboardTableProps) => {
+export const LeaderboardTable = ({
+  data: initialData,
+  timer,
+  type,
+  maxResults,
+}: LeaderboardTableProps) => {
+  const searchParams = useSearchParams();
+  const leaderboardType = searchParams.get("type");
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const fetchResults = async ({ pageParam = 1 }) => {
+    const res = await fetch(
+      `/api/leaderboard?type=${type}&time=${timer}&page=${pageParam}`,
+      { cache: "no-store" },
+    );
+
+    return (await res.json()) as TestWithUser[];
+  };
+
+  const { data, fetchNextPage, isFetchingNextPage, hasNextPage } =
+    useInfiniteQuery({
+      queryKey: [`${type}-${timer}`],
+      queryFn: fetchResults,
+      getNextPageParam: (_, pages) => {
+        if (maxResults > LIMIT_PER_PAGE * pages.length) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+      initialData: { pages: [initialData], pageParams: [1] },
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    });
+
+  const results = data?.pages.flatMap((page) => page) ?? initialData;
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const isScrolled =
+      e.currentTarget.scrollHeight -
+        e.currentTarget.clientHeight -
+        e.currentTarget.scrollTop <=
+      10;
+
+    if (isScrolled && hasNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  useEffect(() => {
+    const element = containerRef.current;
+
+    if (!element) return;
+
+    element.scrollTo(0, 0);
+  }, [leaderboardType]);
+
   return (
-    <>
+    <div
+      ref={containerRef}
+      onScroll={handleScroll}
+      className="scrollbar-sm max-h-80 w-full overflow-y-auto lg:max-h-[620px]"
+    >
       <Table>
         <TableHeader>
           <TableRow className="text-xs">
@@ -35,9 +118,9 @@ export const LeaderboardTable = ({ data }: LeaderboardTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((row, index) => (
+          {results.map((row, index) => (
             <TableRow
-              key={row.test.id}
+              key={`${row.test.id}-${index}`}
               className={cn({
                 "bg-dark-tremor-background-muted": index % 2 === 0,
               })}
@@ -59,19 +142,24 @@ export const LeaderboardTable = ({ data }: LeaderboardTableProps) => {
                 {row.test.accuracy}%
               </TableCell>
               <TableCell className="hidden text-right text-foreground/80 sm:table-cell">
-                {formatDate(row.test.created_at)}
+                {formatDate(new Date(row.test.createdAt))}
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-      {!data.length && (
+      {isFetchingNextPage && (
+        <div className="flex items-center justify-center py-4">
+          <span className="text-sm text-muted-foreground">Loading more...</span>
+        </div>
+      )}
+      {!results.length && (
         <div className="flex items-center justify-center py-4">
           <span className="text-sm text-muted-foreground">
             Currently we don&apos;t have any data for this leaderboard
           </span>
         </div>
       )}
-    </>
+    </div>
   );
 };
