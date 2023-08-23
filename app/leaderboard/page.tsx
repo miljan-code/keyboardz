@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { getLeaderboard } from "@/lib/queries";
 import { tests } from "@/db/schema";
@@ -16,11 +16,20 @@ interface LeaderboardPageProps {
 }
 
 const getTotalTests = async () => {
-  const [result] = await db
+  const [maxResults15] = await db
     .select({ count: sql<number>`count(*)` })
-    .from(tests);
+    .from(tests)
+    .where(and(eq(tests.mode, "timer"), eq(tests.amount, 15)));
 
-  return result.count;
+  const [maxResults60] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(tests)
+    .where(and(eq(tests.mode, "timer"), eq(tests.amount, 60)));
+
+  return {
+    maxResults15: maxResults15.count,
+    maxResults60: maxResults60.count,
+  };
 };
 
 export default async function LeaderboardPage({
@@ -28,7 +37,7 @@ export default async function LeaderboardPage({
 }: LeaderboardPageProps) {
   const dataTimer60 = await getLeaderboard(60, searchParams.type);
   const dataTimer15 = await getLeaderboard(15, searchParams.type);
-  const maxResults = await getTotalTests();
+  const { maxResults15, maxResults60 } = await getTotalTests();
 
   return (
     <section className="mt-4 space-y-6 px-8">
@@ -44,7 +53,7 @@ export default async function LeaderboardPage({
             data={dataTimer60}
             timer={60}
             type={searchParams.type}
-            maxResults={maxResults}
+            maxResults={maxResults60}
           />
         </div>
         <div className="h-[1px] w-full bg-border lg:hidden" />
@@ -58,7 +67,7 @@ export default async function LeaderboardPage({
             data={dataTimer15}
             timer={15}
             type={searchParams.type}
-            maxResults={maxResults}
+            maxResults={maxResults15}
           />
         </div>
       </div>

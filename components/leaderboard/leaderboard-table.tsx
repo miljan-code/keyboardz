@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { cn, formatDate } from "@/lib/utils";
@@ -42,9 +44,15 @@ export const LeaderboardTable = ({
   type,
   maxResults,
 }: LeaderboardTableProps) => {
+  const searchParams = useSearchParams();
+  const leaderboardType = searchParams.get("type");
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const fetchResults = async ({ pageParam = 1 }) => {
     const res = await fetch(
       `/api/leaderboard?type=${type}&time=${timer}&page=${pageParam}`,
+      { cache: "no-store" },
     );
 
     return (await res.json()) as TestWithUser[];
@@ -80,8 +88,17 @@ export const LeaderboardTable = ({
     }
   };
 
+  useEffect(() => {
+    const element = containerRef.current;
+
+    if (!element) return;
+
+    element.scrollTo(0, 0);
+  }, [leaderboardType]);
+
   return (
     <div
+      ref={containerRef}
       onScroll={handleScroll}
       className="scrollbar-sm max-h-80 w-full overflow-y-auto lg:max-h-[620px]"
     >
