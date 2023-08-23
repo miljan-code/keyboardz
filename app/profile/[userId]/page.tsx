@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { db } from "@/db";
+import { eq } from "drizzle-orm";
 
 import { getUserStats } from "@/lib/queries";
 import { formatDate } from "@/lib/utils";
@@ -10,6 +11,18 @@ import { Card } from "@/components/ui/card";
 
 interface UserPageProps {
   params: { userId: User["id"] };
+}
+
+export async function generateMetadata({ params }: UserPageProps) {
+  const { userId } = params;
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  return {
+    title: user?.name || "Account",
+  };
 }
 
 export const generateStaticParams = async () => {

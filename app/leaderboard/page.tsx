@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { db } from "@/db";
 import { and, eq, sql } from "drizzle-orm";
 
@@ -8,6 +9,10 @@ import {
   type LeaderboardType,
 } from "@/components/leaderboard/leaderboard-heading";
 import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
+
+export const metadata: Metadata = {
+  title: "Settings",
+};
 
 interface LeaderboardPageProps {
   searchParams: {

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { getSession } from "@/lib/auth";
@@ -9,6 +10,10 @@ import { Wpm30dayChart } from "@/components/profile/wpm-30day-chart";
 import { WpmStatsBox } from "@/components/profile/wpm-stats-box";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Profile",
+};
 
 const getCurrentUserStats = async () => {
   const session = await getSession();
