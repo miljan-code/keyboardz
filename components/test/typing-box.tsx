@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCapslockStatus } from "@/hooks/use-capslock-status";
 import { useModal } from "@/hooks/use-modal";
 import { useTimer } from "@/hooks/use-timer";
+import useUnmount from "@/hooks/use-unmount";
 import { useUpdateUI } from "@/hooks/use-update-ui";
 import { useWpm } from "@/hooks/use-wpm";
 import { useAtom } from "jotai";
@@ -79,6 +80,8 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     resetWrapperBox,
   ]);
 
+  useUnmount(() => resetTest());
+
   // Event listener for Tab key to reset the test
   useEffect(() => {
     const handleResetTest = (e: KeyboardEvent) => {
@@ -90,7 +93,9 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
     window.addEventListener("keydown", handleResetTest);
 
-    return () => window.removeEventListener("keydown", handleResetTest);
+    return () => {
+      window.removeEventListener("keydown", handleResetTest);
+    };
   }, [resetTest]);
 
   // resets test when mode is changed
@@ -338,7 +343,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
         </div>
         <div
           className={cn(
-            "absolute inset-0 flex items-center justify-center bg-transparent text-white backdrop-blur-sm transition-opacity",
+            "absolute inset-0 flex items-center justify-center bg-transparent text-foreground backdrop-blur-sm transition-opacity",
             {
               "opacity-0": isInputFocused,
               "delay-500": !isInputFocused,
