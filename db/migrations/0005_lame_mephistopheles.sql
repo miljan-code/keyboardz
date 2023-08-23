@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "user_email_idx" ON "user" ("email");

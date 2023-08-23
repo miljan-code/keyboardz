@@ -10,15 +10,21 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
-export const users = pgTable("user", {
-  id: text("id").notNull().primaryKey(),
-  name: text("name"),
-  email: text("email").notNull(),
-  emailVerified: timestamp("emailVerified", { mode: "date" }),
-  image: text("image"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+export const users = pgTable(
+  "user",
+  {
+    id: text("id").notNull().primaryKey(),
+    name: text("name"),
+    email: text("email").notNull(),
+    emailVerified: timestamp("emailVerified", { mode: "date" }),
+    image: text("image"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (user) => ({
+    userEmailIdx: index("user_email_idx").on(user.email),
+  }),
+);
 
 export const accounts = pgTable(
   "account",
