@@ -14,4 +14,4 @@ export const leaderboardCategories: LeaderbaordCategory[] = [
   },
 ];
 
-export const LIMIT_PER_PAGE = 10;
+export const LIMIT_PER_PAGE = 20;

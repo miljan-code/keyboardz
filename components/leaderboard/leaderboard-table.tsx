@@ -122,7 +122,7 @@ export const LeaderboardTable = ({
             <TableRow
               key={`${row.test.id}-${index}`}
               className={cn({
-                "bg-dark-tremor-background-muted": index % 2 === 0,
+                "bg-primary/5": index % 2 === 0,
               })}
             >
               <TableCell className="font-medium">{index + 1}</TableCell>

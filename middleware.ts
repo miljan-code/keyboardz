@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
-  const restrictedPaths = ["/profile", "/lobby"];
+  const restrictedPaths = ["/profile", "/lobby", "/settings"];
   const requestedPath = req.nextUrl.pathname;
   const token = await getToken({ req });
 

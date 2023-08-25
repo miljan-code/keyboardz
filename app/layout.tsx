@@ -6,6 +6,7 @@ import { siteConfig } from "@/config/site";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Providers } from "@/components/providers";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 
 import "@/styles/globals.css";
@@ -75,21 +76,23 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <Providers>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body
           className={cn(
             fontSans.variable,
             fontHeading.variable,
             fontMono.variable,
-            "dark font-sans antialiased",
+            "theme-blue font-sans antialiased",
           )}
         >
-          <main className="mx-auto grid min-h-screen max-w-7xl grid-flow-row grid-rows-[auto_1fr_auto] gap-6 md:gap-8">
-            <Header />
-            {children}
-            <Footer />
-          </main>
-          <Toaster />
+          <ThemeProvider>
+            <main className="mx-auto grid min-h-screen max-w-7xl grid-flow-row grid-rows-[auto_1fr_auto] gap-6 md:gap-8">
+              <Header />
+              {children}
+              <Footer />
+            </main>
+            <Toaster />
+          </ThemeProvider>
         </body>
       </html>
     </Providers>
