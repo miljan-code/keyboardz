@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     await db.insert(tests).values({ userId: session.user.id, ...test });
 
-    return new Response("Result saved to db", { status: 201 });
+    return new Response(JSON.stringify("Result saved to db"), { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(JSON.stringify(error.issues), { status: 422 });

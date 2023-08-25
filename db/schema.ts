@@ -20,6 +20,11 @@ export const users = pgTable(
     image: text("image"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    bio: text("bio"),
+    keyboard: text("keyboard"),
+    github: text("github"),
+    x: text("x"),
+    website: text("website"),
   },
   (user) => ({
     userEmailIdx: index("user_email_idx").on(user.email),

@@ -43,6 +43,13 @@
       "when": 1692806586964,
       "tag": "0005_lame_mephistopheles",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1692951779332,
+      "tag": "0006_curly_rhodey",
+      "breakpoints": true
     }
   ]
 }

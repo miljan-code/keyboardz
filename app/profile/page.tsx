@@ -44,7 +44,7 @@ export default async function ProfilePage() {
             </span>
           </div>
           <div className="flex gap-2 md:ml-auto md:flex-col">
-            <EditProfile />
+            <EditProfile user={data.user} />
             <CopyLinkButton userId={data.user.id} />
           </div>
         </div>

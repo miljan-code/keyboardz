@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { getUserStats } from "@/lib/queries";
 import { formatDate } from "@/lib/utils";
 import { users, type User } from "@/db/schema";
+import { Icons } from "@/components/icons";
 import { WpmStatsBox } from "@/components/profile/wpm-stats-box";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
@@ -43,7 +44,7 @@ export default async function UserPage({ params }: UserPageProps) {
   return (
     <section className="flex flex-col justify-center space-y-10 px-8 max-md:mt-10">
       <Card className="flex flex-col md:grid md:grid-cols-[1fr_auto]">
-        <div className="flex items-center gap-4 border-r px-6 py-4">
+        <div className="flex flex-wrap items-center gap-4 border-r px-6 py-4 sm:flex-nowrap">
           <Avatar className="h-16 w-16 sm:h-24 sm:w-24">
             <AvatarImage src={data.user.image || ""} />
           </Avatar>
@@ -54,6 +55,37 @@ export default async function UserPage({ params }: UserPageProps) {
             <span className="text-xs text-muted-foreground sm:text-sm">
               Joined {formatDate(data.user.createdAt)}
             </span>
+            <div className="mt-2 flex items-center gap-2">
+              {data.user.github && (
+                <a href={`https://github.com/${data.user.github}`}>
+                  <Icons.github size={16} />
+                </a>
+              )}
+              {data.user.x && (
+                <a href={`https://twitter.com/${data.user.x}`}>
+                  <Icons.twitter size={16} />
+                </a>
+              )}
+              {data.user.website && (
+                <a href={data.user.website}>
+                  <Icons.link size={18} />
+                </a>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            {data.user.bio && (
+              <div className="flex flex-col">
+                <span className="text-xs text-foreground/60">Bio:</span>
+                <p className="text-sm">{data.user.bio}</p>
+              </div>
+            )}
+            {data.user.keyboard && (
+              <div className="flex flex-col">
+                <span className="text-xs text-foreground/60">Keyboard:</span>
+                <p className="text-sm">{data.user.keyboard}</p>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex w-full justify-between sm:max-md:px-4">
