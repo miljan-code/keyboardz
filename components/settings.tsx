@@ -32,7 +32,10 @@ export const Settings = () => {
           <SelectContent>
             <SelectItem value="light">Light</SelectItem>
             <SelectItem value="dark-blue">Dark Blue</SelectItem>
-            {/* <SelectItem value="dark-green">Dark Green</SelectItem> */}
+            <SelectItem value="dark-green">Dark Green</SelectItem>
+            <SelectItem value="yellow">Yellow</SelectItem>
+            <SelectItem value="neutral">Neutral</SelectItem>
+            <SelectItem value="slate">Slate</SelectItem>
           </SelectContent>
         </Select>
       </div>

@@ -1,6 +1,9 @@
 "use client";
 
 import { AreaChart, Grid } from "@tremor/react";
+import { useTheme } from "next-themes";
+
+import { chartTheme } from "@/config/themes";
 
 import type { WpmHistory } from "@/types/test";
 
@@ -9,11 +12,15 @@ interface WpmChartProps {
 }
 
 export const WpmChart = ({ data }: WpmChartProps) => {
+  const { theme } = useTheme();
+
   const wpmHistory = data.map((item, i) => ({
     index: i + 1,
     wpm: item.wpm,
     raw: item.rawWpm,
   }));
+
+  const colors = chartTheme[theme ?? "dark-blue"];
 
   return (
     <Grid>
@@ -22,7 +29,7 @@ export const WpmChart = ({ data }: WpmChartProps) => {
         data={wpmHistory}
         categories={["wpm", "raw"]}
         index="index"
-        colors={["blue", "cyan"]}
+        colors={colors}
         yAxisWidth={60}
       />
     </Grid>

@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { db } from "@/db";
+import { format } from "date-fns";
+import { and, eq, gte } from "drizzle-orm";
 
 import { getSession } from "@/lib/auth";
 import { getUserStats } from "@/lib/queries";
-import { formatDate } from "@/lib/utils";
+import { daysAgo, formatDate } from "@/lib/utils";
+import { tests } from "@/db/schema";
 import { CopyLinkButton } from "@/components/profile/copy-link-button";
 import { EditProfile } from "@/components/profile/edit-profile";
 import { Wpm30dayChart } from "@/components/profile/wpm-30day-chart";
@@ -23,8 +27,52 @@ const getCurrentUserStats = async () => {
   return await getUserStats(session.user.id);
 };
 
+const get30DayWpmAverage = async () => {
+  const session = await getSession();
+
+  if (!session) return null;
+
+  const results = await db.query.tests.findMany({
+    columns: {
+      wpm: true,
+      createdAt: true,
+    },
+    where: and(
+      eq(tests.userId, session.user.id),
+      gte(tests.createdAt, daysAgo(30)),
+    ),
+  });
+
+  const transformedResults = results.map((result) => ({
+    date: format(result.createdAt, "dd MMM"),
+    wpm: result.wpm,
+  }));
+
+  const avgWpmByDate = transformedResults.reduce(
+    (acc, cur) => {
+      if (!acc[cur.date]) {
+        acc[cur.date] = { wpm: 0, count: 0 };
+      }
+
+      acc[cur.date].wpm += cur.wpm;
+      acc[cur.date].count += 1;
+
+      return acc;
+    },
+    {} as Record<string, { wpm: number; count: number }>,
+  );
+
+  return Object.entries(avgWpmByDate).map(([date, { wpm, count }]) => ({
+    date,
+    "Average Daily WPM": Math.round(wpm / count),
+  }));
+};
+
+export type ChartData = Awaited<ReturnType<typeof get30DayWpmAverage>>;
+
 export default async function ProfilePage() {
   const data = await getCurrentUserStats();
+  const chartData = await get30DayWpmAverage();
 
   if (!data) return redirect("/");
 
@@ -78,7 +126,7 @@ export default async function ProfilePage() {
         <WpmStatsBox data={data.timerScores} />
         <WpmStatsBox data={data.wordScores} />
       </div>
-      <Wpm30dayChart />
+      <Wpm30dayChart data={chartData} />
     </section>
   );
 }
