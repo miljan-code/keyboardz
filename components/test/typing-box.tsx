@@ -5,15 +5,16 @@ import { useRouter } from "next/navigation";
 import { useCapslockStatus } from "@/hooks/use-capslock-status";
 import { useModal } from "@/hooks/use-modal";
 import { useTimer } from "@/hooks/use-timer";
-import useUnmount from "@/hooks/use-unmount";
+import { useUnmount } from "@/hooks/use-unmount";
 import { useUpdateUI } from "@/hooks/use-update-ui";
 import { useWpm } from "@/hooks/use-wpm";
 import { useAtom, useAtomValue } from "jotai";
 
-import { currentTextAtom, settingsAtom, testModeAtom } from "@/lib/store";
+import { currentTextAtom, testModeAtom } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { TestResult } from "@/components/test/test-result";
+import { TestInfo } from "./test-info";
 
 interface TypingBoxProps {
   text: string;
@@ -26,11 +27,10 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   const [testFinished, setTestFinished] = useState(false);
   const [testStarted, setTestStarted] = useState(false);
   const [letters, setLetters] = useState<string[]>([]);
-  const [addedLetters, setAddedLetters] = useState(0);
+  const [extraLetters, setExtraLetters] = useState(0);
 
   const [currentText, setCurrentText] = useAtom(currentTextAtom);
   const testMode = useAtomValue(testModeAtom);
-  const settings = useAtomValue(settingsAtom);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,7 +62,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     setCurrentText("");
     setTestStarted(false);
     setTestFinished(false);
-    setAddedLetters(0);
+    setExtraLetters(0);
     stopTimer();
     resetTimer(time);
     updateCaret("reset");
@@ -178,7 +178,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       // if yes reset added words and check if theres need for new line
       if (nextLetterToType === " ") {
         checkForNewLine();
-        setAddedLetters(0);
+        setExtraLetters(0);
       } else {
         // if no skip current word
         e.preventDefault();
@@ -205,12 +205,12 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
     // displays missed letters to the ui
     if (nextLetterToType === " " && currentLetter !== " ") {
-      if (addedLetters > MAX_WRONG_LETTERS) return null;
+      if (extraLetters > MAX_WRONG_LETTERS) return null;
 
       const arr = [...letters];
       arr.splice(inputLength - 1, 0, currentLetter?.toUpperCase() || "_");
       setLetters(arr);
-      setAddedLetters((prev) => prev + 1);
+      setExtraLetters((prev) => prev + 1);
     }
 
     if (currentText.length > inputLength) updateCaret("backspace");
@@ -246,7 +246,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       const arr = [...letters];
       arr.splice(index, 1);
       setLetters(arr);
-      setAddedLetters((prev) => prev - 1);
+      setExtraLetters((prev) => prev - 1);
     }
   };
 
@@ -277,51 +277,11 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
 
   return (
     <div className="relative">
-      <div className="flex items-center justify-between">
-        <div
-          className={cn(
-            "mb-2 flex items-center gap-2 text-lg font-medium text-primary transition-opacity",
-            {
-              "opacity-0": !testStarted,
-            },
-          )}
-        >
-          {testMode.mode === "words" && (
-            <span>
-              {inputWords.length - 1}/{testMode.amount}
-            </span>
-          )}
-          <span>{elapsedTime}</span>
-        </div>
-        <div
-          className={cn(
-            "flex -translate-y-10 items-center gap-2 rounded-md bg-primary px-4 py-2 transition-opacity",
-            {
-              "opacity-0": !isCaps,
-            },
-          )}
-        >
-          <span className="font-medium text-background">CapsLock</span>
-          <Icons.lock size={16} className="text-background" />
-        </div>
-        {settings.liveWpm && (
-          <div
-            className={cn(
-              "mb-2 flex items-center gap-2 text-lg font-medium text-primary transition-opacity",
-              {
-                "opacity-0": !testStarted,
-              },
-            )}
-          >
-            {wpmStats.liveWpm > 0 ? (
-              <>
-                <span className="text-foreground/60">Live WPM</span>
-                <span>{wpmStats.liveWpm}</span>
-              </>
-            ) : null}
-          </div>
-        )}
-      </div>
+      <TestInfo
+        wpmStats={wpmStats}
+        testStarted={testStarted}
+        inputWords={inputWords}
+      />
       <div
         ref={containerRef}
         className="animate-enter-opacity relative h-[100px] overflow-hidden font-mono"

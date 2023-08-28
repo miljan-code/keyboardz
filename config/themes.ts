@@ -1,4 +1,4 @@
-import { type DEFAULT_COLOR } from "@tremor/react/dist/lib/theme";
+import { type DEFAULT_COLOR as ChartColors } from "@tremor/react/dist/lib/theme";
 
 export const chartTheme = {
   light: ["blue", "cyan"],
@@ -7,4 +7,4 @@ export const chartTheme = {
   yellow: ["yellow", "orange"],
   neutral: ["neutral", "slate"],
   slate: ["slate", "neutral"],
-} as Record<string, (typeof DEFAULT_COLOR)[]>;
+} as Record<string, (typeof ChartColors)[]>;

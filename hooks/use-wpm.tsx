@@ -63,7 +63,7 @@ export const useWpm = ({ text }: UseWPMProps) => {
     setWpmStats({ ...wpmStats, ...stats });
   };
 
-  const recordWpm = () => {
+  const calculateLiveWPM = () => {
     const correctWords = correctWordsRef.current;
     const inputWords = inputWordsRef.current;
     const elapsedTime = elapsedTimeRef.current;
@@ -80,7 +80,7 @@ export const useWpm = ({ text }: UseWPMProps) => {
     setWpmStats(initialWpmStats);
     setWpmHistory([]);
 
-    intervalRef.current = setInterval(recordWpm, 1000);
+    intervalRef.current = setInterval(calculateLiveWPM, 1000);
   };
 
   const stopMeasuring = () => {
@@ -89,7 +89,7 @@ export const useWpm = ({ text }: UseWPMProps) => {
     const wpmHistoryWithoutZeros = removeLeadingZeros(wpmHistory, 1);
 
     setWpmHistory(wpmHistoryWithoutZeros);
-    recordWpm();
+    calculateLiveWPM();
     calculateWPM();
   };
 
@@ -101,13 +101,13 @@ export const useWpm = ({ text }: UseWPMProps) => {
   };
 };
 
-interface TransformWords {
+interface TransformWordsInput {
   input: string;
   text: string;
   testMode: TestMode;
 }
 
-function transformWords({ input, text, testMode }: TransformWords) {
+function transformWords({ input, text, testMode }: TransformWordsInput) {
   const inputWords = input.split(" ");
 
   let words: string[] = [];
@@ -123,12 +123,12 @@ function transformWords({ input, text, testMode }: TransformWords) {
   return { inputWords, correctWords, words };
 }
 
-interface CalculateAccuracy {
+interface CalculateAccuracyInput {
   inputWords: string[];
   words: string[];
 }
 
-function calculateAccuracy({ inputWords, words }: CalculateAccuracy) {
+function calculateAccuracy({ inputWords, words }: CalculateAccuracyInput) {
   let correctChars = 0;
   let incorrectChars = 0;
 
@@ -169,13 +169,13 @@ function removeLeadingZeros(arr: WpmHistory[], amount: number) {
   return newArr;
 }
 
-interface GetWPM {
+interface GetWPMInput {
   correctWords: number;
   inputWords: string[];
   time: number;
 }
 
-function getWPM({ correctWords, inputWords, time }: GetWPM) {
+function getWPM({ correctWords, inputWords, time }: GetWPMInput) {
   let wpm = Math.round(correctWords / (time / 60));
   let rawWpm = Math.round(inputWords.length / (time / 60));
 
@@ -189,13 +189,13 @@ function getWPM({ correctWords, inputWords, time }: GetWPM) {
   return { wpm, rawWpm };
 }
 
-interface GetTestTime {
+interface GetTestTimeInput {
   elapsedTime: number;
   type: "calculate" | "record";
   testMode: TestMode;
 }
 
-function getTestTime({ elapsedTime, type, testMode }: GetTestTime) {
+function getTestTime({ elapsedTime, type, testMode }: GetTestTimeInput) {
   if (type === "calculate") {
     return testMode.mode === "timer" ? testMode.amount : elapsedTime;
   } else {
