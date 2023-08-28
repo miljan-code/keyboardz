@@ -1,57 +1,21 @@
-import { db } from "@/db";
+"use client";
+
+import type { ChartData } from "@/app/profile/page";
 import { Grid, LineChart } from "@tremor/react";
-import { format } from "date-fns";
-import { and, eq, gte } from "drizzle-orm";
+import { useTheme } from "next-themes";
 
-import { getSession } from "@/lib/auth";
-import { daysAgo } from "@/lib/utils";
-import { tests } from "@/db/schema";
+import { chartTheme } from "@/config/themes";
 
-const get30DayWpmAverage = async () => {
-  const session = await getSession();
+interface Wpm30dayChartProps {
+  data: ChartData;
+}
 
-  if (!session) return null;
-
-  const results = await db.query.tests.findMany({
-    columns: {
-      wpm: true,
-      createdAt: true,
-    },
-    where: and(
-      eq(tests.userId, session.user.id),
-      gte(tests.createdAt, daysAgo(30)),
-    ),
-  });
-
-  const transformedResults = results.map((result) => ({
-    date: format(result.createdAt, "dd MMM"),
-    wpm: result.wpm,
-  }));
-
-  const avgWpmByDate = transformedResults.reduce(
-    (acc, cur) => {
-      if (!acc[cur.date]) {
-        acc[cur.date] = { wpm: 0, count: 0 };
-      }
-
-      acc[cur.date].wpm += cur.wpm;
-      acc[cur.date].count += 1;
-
-      return acc;
-    },
-    {} as Record<string, { wpm: number; count: number }>,
-  );
-
-  return Object.entries(avgWpmByDate).map(([date, { wpm, count }]) => ({
-    date,
-    "Average Daily WPM": Math.round(wpm / count),
-  }));
-};
-
-export const Wpm30dayChart = async () => {
-  const data = await get30DayWpmAverage();
+export const Wpm30dayChart = ({ data }: Wpm30dayChartProps) => {
+  const { theme } = useTheme();
 
   if (!data) return null;
+
+  const colors = chartTheme[theme ?? "dark-blue"];
 
   return (
     <Grid className="max-md:pb-12">
@@ -60,7 +24,7 @@ export const Wpm30dayChart = async () => {
         data={data}
         index="date"
         categories={["Average Daily WPM"]}
-        colors={["blue"]}
+        colors={colors}
         yAxisWidth={40}
       />
     </Grid>

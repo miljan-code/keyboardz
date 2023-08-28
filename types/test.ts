@@ -19,3 +19,7 @@ export interface WpmHistory {
   wpm: number;
   rawWpm: number;
 }
+
+export interface TestSettings {
+  liveWpm: boolean;
+}

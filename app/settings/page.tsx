@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { ChangeTheme } from "@/components/change-theme";
+import { Settings } from "@/components/settings";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -15,7 +15,7 @@ export default async function SettingsPage() {
         </h2>
         <span className="text-foreground/60">Customize app to your needs.</span>
       </div>
-      <ChangeTheme />
+      <Settings />
     </section>
   );
 }
