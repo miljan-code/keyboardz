@@ -1,3 +1,5 @@
+import type { User } from "next-auth";
+
 import type { EnvSchema } from "@/lib/env";
 
 declare global {
@@ -6,19 +8,16 @@ declare global {
   }
 }
 
-export type NavItem = {
-  title: string;
-  href: string;
-  disabled?: boolean;
-};
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: User["id"];
+  }
+}
 
-export type SiteConfig = {
-  name: string;
-  description: string;
-  url: string;
-  links: {
-    github: string;
-  };
-  nav: NavItem[];
-  mobileMenu: NavItem[];
-};
+declare module "next-auth" {
+  interface Session {
+    user: User & {
+      id: User["id"];
+    };
+  }
+}

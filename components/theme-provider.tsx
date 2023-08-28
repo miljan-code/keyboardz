@@ -8,6 +8,8 @@ interface ThemeProviderProps {
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   return (
-    <NextThemeProvider defaultTheme="dark-blue">{children}</NextThemeProvider>
+    <NextThemeProvider defaultTheme="dark-blue" storageKey="keyboardz__theme">
+      {children}
+    </NextThemeProvider>
   );
 };

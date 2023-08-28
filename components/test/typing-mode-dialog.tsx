@@ -40,8 +40,8 @@ export const TypingModeDialog = () => {
   const form = useForm<TestMode>({
     resolver: zodResolver(testModeFormSchema),
     defaultValues: {
-      mode: "timer",
-      amount: 60,
+      mode: testMode.mode,
+      amount: testMode.amount,
     },
   });
 

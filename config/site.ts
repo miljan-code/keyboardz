@@ -1,4 +1,4 @@
-import type { NavItem, SiteConfig } from "@/types";
+import type { NavItem, SiteConfig } from "@/types/config";
 
 const nav: NavItem[] = [
   {

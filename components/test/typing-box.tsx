@@ -8,9 +8,9 @@ import { useTimer } from "@/hooks/use-timer";
 import useUnmount from "@/hooks/use-unmount";
 import { useUpdateUI } from "@/hooks/use-update-ui";
 import { useWpm } from "@/hooks/use-wpm";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 
-import { currentTextAtom, testModeAtom } from "@/lib/atoms";
+import { currentTextAtom, settingsAtom, testModeAtom } from "@/lib/atoms";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { TestResult } from "@/components/test/test-result";
@@ -29,7 +29,8 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
   const [addedLetters, setAddedLetters] = useState(0);
 
   const [currentText, setCurrentText] = useAtom(currentTextAtom);
-  const [testMode] = useAtom(testModeAtom);
+  const testMode = useAtomValue(testModeAtom);
+  const settings = useAtomValue(settingsAtom);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,7 +47,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
     containerRef,
   });
   const { startTimer, stopTimer, resetTimer, elapsedTime } = useTimer();
-  const { startMeasuring, stopMeasuring } = useWpm({ text });
+  const { startMeasuring, stopMeasuring, wpmStats } = useWpm({ text });
   const { isModalOpen } = useModal();
   const { isCaps } = useCapslockStatus();
 
@@ -303,7 +304,23 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
           <span className="font-medium text-background">CapsLock</span>
           <Icons.lock size={16} className="text-background" />
         </div>
-        <div />
+        {settings.liveWpm && (
+          <div
+            className={cn(
+              "mb-2 flex items-center gap-2 text-lg font-medium text-primary transition-opacity",
+              {
+                "opacity-0": !testStarted,
+              },
+            )}
+          >
+            {wpmStats.liveWpm > 0 ? (
+              <>
+                <span className="text-foreground/60">Live WPM</span>
+                <span>{wpmStats.liveWpm}</span>
+              </>
+            ) : null}
+          </div>
+        )}
       </div>
       <div
         ref={containerRef}
