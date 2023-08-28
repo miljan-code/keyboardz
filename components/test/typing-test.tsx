@@ -2,7 +2,6 @@
 
 import { useGenerateText } from "@/hooks/use-generate-text";
 
-import { ClientOnly } from "@/components/client-only";
 import { Loader } from "@/components/loader";
 import { TypingBox } from "@/components/test/typing-box";
 import { TypingModeDialog } from "@/components/test/typing-mode-dialog";
@@ -13,9 +12,7 @@ export const TypingTest = () => {
   return (
     <>
       <div className="flex justify-center">
-        <ClientOnly>
-          <TypingModeDialog />
-        </ClientOnly>
+        <TypingModeDialog />
       </div>
       {!isLoading ? (
         <div className="relative -mt-12 flex h-full items-center justify-center before:absolute before:left-1/2 before:top-1/2 before:w-full before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:shadow-bg-primary">

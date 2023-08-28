@@ -10,7 +10,7 @@ import { useUpdateUI } from "@/hooks/use-update-ui";
 import { useWpm } from "@/hooks/use-wpm";
 import { useAtom, useAtomValue } from "jotai";
 
-import { currentTextAtom, settingsAtom, testModeAtom } from "@/lib/atoms";
+import { currentTextAtom, settingsAtom, testModeAtom } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { TestResult } from "@/components/test/test-result";
@@ -324,7 +324,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
       </div>
       <div
         ref={containerRef}
-        className="relative h-[100px] overflow-hidden font-mono"
+        className="animate-enter-opacity relative h-[100px] overflow-hidden font-mono"
       >
         <div
           ref={wrapperRef}
@@ -367,7 +367,7 @@ export const TypingBox = ({ text }: TypingBoxProps) => {
             },
           )}
         >
-          <span className="flex items-center gap-2 bg-background/50 p-2">
+          <span className="flex items-center gap-2 bg-background/50 p-2 max-sm:text-xs">
             <Icons.pointer /> Click here or start typing to focus
           </span>
         </div>

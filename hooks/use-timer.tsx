@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { atom, useAtom } from "jotai";
+import { useAtom } from "jotai";
 
-const timeAtom = atom(0);
+import { timerAtom } from "@/lib/store";
 
 export const useTimer = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [countdown, setCountdown] = useState(false);
 
-  const [time, setTime] = useAtom(timeAtom);
+  const [time, setTime] = useAtom(timerAtom);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;

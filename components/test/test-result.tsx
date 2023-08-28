@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 import { useTimer } from "@/hooks/use-timer";
 import { useWpm } from "@/hooks/use-wpm";
-import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { useSession } from "next-auth/react";
 
-import { testModeAtom } from "@/lib/atoms";
+import { testModeAtom } from "@/lib/store";
 import { WpmChart } from "@/components/test/wpm-chart";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -15,8 +15,7 @@ interface TestResultProps {
 }
 
 export const TestResult = ({ text }: TestResultProps) => {
-  const [testMode] = useAtom(testModeAtom);
-
+  const testMode = useAtomValue(testModeAtom);
   const { data: session } = useSession();
   const { wpmStats, wpmHistory } = useWpm({ text });
   const { elapsedTime } = useTimer();

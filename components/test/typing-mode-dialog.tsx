@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAtom } from "jotai";
 import { useForm } from "react-hook-form";
 
-import { testModeAtom } from "@/lib/atoms";
+import { testModeAtom } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { testModeFormSchema } from "@/lib/validations/test-mode-schema";
 import { leaderboardCategories } from "@/config/leaderboard";
@@ -31,6 +31,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ClientOnly } from "../client-only";
 
 import type { TestMode } from "@/types/test";
 
@@ -156,18 +157,20 @@ export const TypingModeDialog = () => {
           </Form>
         </DialogContent>
       </Dialog>
-      <div className="flex items-center gap-2 text-sm text-primary">
-        <div className="flex items-center gap-1">
-          {testMode.mode === "timer" ? (
-            <Icons.timer size={14} />
-          ) : (
-            <Icons.words size={14} />
-          )}
-          {testMode.mode}
+      <ClientOnly>
+        <div className="animate-slide-down flex items-center gap-2 text-sm text-primary">
+          <div className="flex items-center gap-1">
+            {testMode.mode === "timer" ? (
+              <Icons.timer size={14} />
+            ) : (
+              <Icons.words size={14} />
+            )}
+            {testMode.mode}
+          </div>
+          <span>&mdash;</span>
+          <span>{testMode.amount}</span>
         </div>
-        <span>&mdash;</span>
-        <span>{testMode.amount}</span>
-      </div>
+      </ClientOnly>
     </div>
   );
 };

@@ -3,7 +3,7 @@
 import { useAtom } from "jotai";
 import { useTheme } from "next-themes";
 
-import { settingsAtom } from "@/lib/atoms";
+import { settingsAtom } from "@/lib/store";
 import { Label } from "@/components/ui/label";
 import {
   Select,
