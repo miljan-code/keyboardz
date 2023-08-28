@@ -45,7 +45,7 @@ export const LeaderboardTable = ({
   maxResults,
 }: LeaderboardTableProps) => {
   const searchParams = useSearchParams();
-  const leaderboardType = searchParams.get("type");
+  const leaderboardType = searchParams?.get("type");
 
   const containerRef = useRef<HTMLDivElement>(null);
 
