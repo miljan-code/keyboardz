@@ -1,9 +1,9 @@
-import { atom, useAtom } from "jotai";
+import { useAtom } from "jotai";
 
-const modalAtom = atom(false);
+import { testModeModalAtom } from "@/lib/store";
 
 export const useModal = () => {
-  const [isModalOpen, setIsModalOpen] = useAtom(modalAtom);
+  const [isModalOpen, setIsModalOpen] = useAtom(testModeModalAtom);
 
   return { isModalOpen, setIsModalOpen };
 };

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAtom } from "jotai";
 import { useForm } from "react-hook-form";
 
-import { testModeAtom } from "@/lib/atoms";
+import { testModeAtom } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { testModeFormSchema } from "@/lib/validations/test-mode-schema";
 import { leaderboardCategories } from "@/config/leaderboard";
@@ -156,7 +156,7 @@ export const TypingModeDialog = () => {
           </Form>
         </DialogContent>
       </Dialog>
-      <div className="flex items-center gap-2 text-sm text-primary">
+      <div className="animate-slide-down flex items-center gap-2 text-sm text-primary">
         <div className="flex items-center gap-1">
           {testMode.mode === "timer" ? (
             <Icons.timer size={14} />

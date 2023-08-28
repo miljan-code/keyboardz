@@ -1,24 +1,16 @@
 import { useEffect, useRef } from "react";
 import { useTimer } from "@/hooks/use-timer";
-import { atom, useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 
-import { currentTextAtom, testModeAtom } from "@/lib/atoms";
+import {
+  currentTextAtom,
+  testModeAtom,
+  wpmHistoryAtom,
+  wpmStatsAtom,
+} from "@/lib/store";
+import { initialWpmStats } from "@/lib/store/test-store";
 
-import type { TestMode, WpmHistory, WpmStats } from "@/types/test";
-
-const initialWpmStats = {
-  wpm: 0,
-  rawWpm: 0,
-  liveWpm: 0,
-  accuracy: 0,
-  chars: {
-    correct: 0,
-    incorrect: 0,
-  },
-};
-
-export const wpmStatsAtom = atom<WpmStats>(initialWpmStats);
-const wpmHistoryAtom = atom<WpmHistory[]>([]);
+import type { TestMode, WpmHistory } from "@/types/test";
 
 interface UseWPMProps {
   text: string;
@@ -27,8 +19,8 @@ interface UseWPMProps {
 export const useWpm = ({ text }: UseWPMProps) => {
   const [wpmStats, setWpmStats] = useAtom(wpmStatsAtom);
   const [wpmHistory, setWpmHistory] = useAtom(wpmHistoryAtom);
-  const [testMode] = useAtom(testModeAtom);
-  const [input] = useAtom(currentTextAtom);
+  const testMode = useAtomValue(testModeAtom);
+  const input = useAtomValue(currentTextAtom);
 
   const { elapsedTime } = useTimer();
 
@@ -71,7 +63,7 @@ export const useWpm = ({ text }: UseWPMProps) => {
     setWpmStats({ ...wpmStats, ...stats });
   };
 
-  const recordWpm = () => {
+  const calculateLiveWPM = () => {
     const correctWords = correctWordsRef.current;
     const inputWords = inputWordsRef.current;
     const elapsedTime = elapsedTimeRef.current;
@@ -88,7 +80,7 @@ export const useWpm = ({ text }: UseWPMProps) => {
     setWpmStats(initialWpmStats);
     setWpmHistory([]);
 
-    intervalRef.current = setInterval(recordWpm, 1000);
+    intervalRef.current = setInterval(calculateLiveWPM, 1000);
   };
 
   const stopMeasuring = () => {
@@ -97,7 +89,7 @@ export const useWpm = ({ text }: UseWPMProps) => {
     const wpmHistoryWithoutZeros = removeLeadingZeros(wpmHistory, 1);
 
     setWpmHistory(wpmHistoryWithoutZeros);
-    recordWpm();
+    calculateLiveWPM();
     calculateWPM();
   };
 
@@ -109,13 +101,13 @@ export const useWpm = ({ text }: UseWPMProps) => {
   };
 };
 
-interface TransformWords {
+interface TransformWordsInput {
   input: string;
   text: string;
   testMode: TestMode;
 }
 
-function transformWords({ input, text, testMode }: TransformWords) {
+function transformWords({ input, text, testMode }: TransformWordsInput) {
   const inputWords = input.split(" ");
 
   let words: string[] = [];
@@ -131,12 +123,12 @@ function transformWords({ input, text, testMode }: TransformWords) {
   return { inputWords, correctWords, words };
 }
 
-interface CalculateAccuracy {
+interface CalculateAccuracyInput {
   inputWords: string[];
   words: string[];
 }
 
-function calculateAccuracy({ inputWords, words }: CalculateAccuracy) {
+function calculateAccuracy({ inputWords, words }: CalculateAccuracyInput) {
   let correctChars = 0;
   let incorrectChars = 0;
 
@@ -177,13 +169,13 @@ function removeLeadingZeros(arr: WpmHistory[], amount: number) {
   return newArr;
 }
 
-interface GetWPM {
+interface GetWPMInput {
   correctWords: number;
   inputWords: string[];
   time: number;
 }
 
-function getWPM({ correctWords, inputWords, time }: GetWPM) {
+function getWPM({ correctWords, inputWords, time }: GetWPMInput) {
   let wpm = Math.round(correctWords / (time / 60));
   let rawWpm = Math.round(inputWords.length / (time / 60));
 
@@ -197,13 +189,13 @@ function getWPM({ correctWords, inputWords, time }: GetWPM) {
   return { wpm, rawWpm };
 }
 
-interface GetTestTime {
+interface GetTestTimeInput {
   elapsedTime: number;
   type: "calculate" | "record";
   testMode: TestMode;
 }
 
-function getTestTime({ elapsedTime, type, testMode }: GetTestTime) {
+function getTestTime({ elapsedTime, type, testMode }: GetTestTimeInput) {
   if (type === "calculate") {
     return testMode.mode === "timer" ? testMode.amount : elapsedTime;
   } else {

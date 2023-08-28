@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAtomValue } from "jotai";
 
-import { testModeAtom } from "@/lib/atoms";
 import { generateRandomText } from "@/lib/generate-text/generate-text";
+import { testModeAtom } from "@/lib/store";
 
 export const useGenerateText = () => {
   const [isLoading, setIsLoading] = useState(true);

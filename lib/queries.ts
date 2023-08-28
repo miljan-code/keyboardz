@@ -4,9 +4,9 @@ import { and, desc, eq, gte } from "drizzle-orm";
 import { daysAgo } from "@/lib/utils";
 import { tests, users, type Test, type User } from "@/db/schema";
 import {
-  LeaderbaordCategory,
   leaderboardCategories,
   LIMIT_PER_PAGE,
+  type LeaderboardCategory,
 } from "@/config/leaderboard";
 import { leaderboards } from "@/components/leaderboard/leaderboard-heading";
 
@@ -86,7 +86,7 @@ export async function getUserStats(userId: User["id"]) {
 
 function getMaxResultsForCategories(
   tests: Test[],
-  categories: LeaderbaordCategory[],
+  categories: LeaderboardCategory[],
 ) {
   return categories.map((category) => {
     return category.amounts.map((amount) => {

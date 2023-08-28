@@ -1,9 +1,9 @@
-export interface LeaderbaordCategory {
+export interface LeaderboardCategory {
   mode: "timer" | "words";
   amounts: number[];
 }
 
-export const leaderboardCategories: LeaderbaordCategory[] = [
+export const leaderboardCategories: LeaderboardCategory[] = [
   {
     mode: "timer",
     amounts: [15, 30, 60, 120],
