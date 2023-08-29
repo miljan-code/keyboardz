@@ -1,6 +1,5 @@
 import type { NextApiRequest } from "next";
 import { db } from "@/db";
-import type { NextApiResponseWithSocket } from "@/pages/api/socket/io";
 import { createId } from "@paralleldrive/cuid2";
 import { getServerSession } from "next-auth";
 import * as z from "zod";
@@ -9,9 +8,11 @@ import { authOptions } from "@/lib/auth";
 import { createRoomSchema } from "@/lib/validations/create-room-schema";
 import { rooms } from "@/db/schema";
 
+import type { NextApiResponseServerIO } from "@/types/next";
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponseWithSocket,
+  res: NextApiResponseServerIO,
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed " });
