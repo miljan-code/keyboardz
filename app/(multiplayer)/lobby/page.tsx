@@ -1,6 +1,18 @@
+import { db } from "@/db";
+import { and, eq } from "drizzle-orm";
+
+import { rooms } from "@/db/schema";
 import { TestRooms } from "@/components/lobby/test-rooms";
 
+const getOpenRooms = async () => {
+  return await db.query.rooms.findMany({
+    where: and(eq(rooms.isActiveRoom, true), eq(rooms.isPublicRoom, true)),
+  });
+};
+
 export default async function LobbyPage() {
+  const rooms = await getOpenRooms();
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col max-md:gap-2 md:flex-row md:items-end md:justify-between">
@@ -21,7 +33,7 @@ export default async function LobbyPage() {
           </p>
         </div>
       </div>
-      <TestRooms />
+      <TestRooms initialRooms={rooms} />
     </div>
   );
 }

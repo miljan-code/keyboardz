@@ -3,12 +3,18 @@ import { Socket } from "net";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Server as SocketServer } from "socket.io";
 
-type NextApiResponseWithSocket = NextApiResponse & {
+export type NextApiResponseWithSocket = NextApiResponse & {
   socket: Socket & {
     server: HttpServer & {
       io: SocketServer;
     };
   };
+};
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
 };
 
 const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {

@@ -1,9 +1,33 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useAtomValue } from "jotai";
+
+import { socketAtom } from "@/lib/store/socket-store";
+import type { Room } from "@/db/schema";
 import { CreateRoom } from "@/components/lobby/create-room";
 
-export const TestRooms = () => {
-  const rooms = [];
+interface TestRoomsProps {
+  initialRooms: Room[];
+}
+
+export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
+  const [rooms, setRooms] = useState<Room[]>(initialRooms);
+  const socket = useAtomValue(socketAtom);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("created_room", (room: Room) => {
+      console.log("Catching created_room event");
+      console.log(room);
+      setRooms([...rooms, room]);
+    });
+
+    return () => {
+      socket.off("created_room");
+    };
+  }, [socket, rooms]);
 
   if (!rooms.length)
     return (
@@ -17,7 +41,9 @@ export const TestRooms = () => {
 
   return (
     <div className="h-48 overflow-y-auto rounded-md bg-foreground/5">
-      Test rooms
+      {rooms.map((room) => (
+        <div key={room.id}>{room.roomName}</div>
+      ))}
     </div>
   );
 };
