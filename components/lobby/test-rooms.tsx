@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAtomValue } from "jotai";
+import { useState } from "react";
 
-import { socketAtom } from "@/lib/store/socket-store";
 import type { Room } from "@/db/schema";
 import { CreateRoom } from "@/components/lobby/create-room";
 
@@ -13,21 +11,6 @@ interface TestRoomsProps {
 
 export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
-  const socket = useAtomValue(socketAtom);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("created_room", (room: Room) => {
-      console.log("Catching created_room event");
-      console.log(room);
-      setRooms([...rooms, room]);
-    });
-
-    return () => {
-      socket.off("created_room");
-    };
-  }, [socket, rooms]);
 
   if (!rooms.length)
     return (
