@@ -1,14 +1,7 @@
-import { db } from "@/db";
-import { and, eq } from "drizzle-orm";
-
-import { rooms } from "@/db/schema";
+import { getOpenRooms } from "@/lib/queries";
 import { TestRooms } from "@/components/lobby/test-rooms";
 
-const getOpenRooms = async () => {
-  return await db.query.rooms.findMany({
-    where: and(eq(rooms.isActiveRoom, true), eq(rooms.isPublicRoom, true)),
-  });
-};
+export type RoomWithCreator = Awaited<ReturnType<typeof getOpenRooms>>[number];
 
 export default async function LobbyPage() {
   const rooms = await getOpenRooms();

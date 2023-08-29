@@ -36,11 +36,11 @@ export default async function handler(
         ...roomData,
         id: createId(),
         creatorId: session.user.id,
-        participantsIds: [],
+        participantsIds: [session.user.id],
       })
       .returning();
 
-    res.socket.server.io.emit("created_room", room);
+    res.socket.server.io.emit("createdRoom", room);
 
     return res.status(201).json(room);
   } catch (error) {

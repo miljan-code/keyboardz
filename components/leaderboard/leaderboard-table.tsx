@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, generateFallback } from "@/lib/utils";
 import type { Test, User } from "@/db/schema";
 import { LIMIT_PER_PAGE } from "@/config/leaderboard";
 import type { LeaderboardType } from "@/components/leaderboard/leaderboard-heading";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -129,6 +129,9 @@ export const LeaderboardTable = ({
               <TableCell className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
                   <AvatarImage src={row.user?.image || ""} />
+                  <AvatarFallback>
+                    {generateFallback(row.user?.name || "")}
+                  </AvatarFallback>
                 </Avatar>
                 <Link href={`/profile/${row.user?.id}`}>{row.user?.name}</Link>
               </TableCell>
