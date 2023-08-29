@@ -1,6 +1,7 @@
 import type { AdapterAccount } from "@auth/core/adapters";
 import { InferModel, relations } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   pgTable,
@@ -92,8 +93,41 @@ export const tests = pgTable(
   }),
 );
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const rooms = pgTable(
+  "room",
+  {
+    id: text("id").notNull().primaryKey(),
+    creatorId: text("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    roomName: text("room_name").notNull(),
+    mode: text("mode").notNull(),
+    amount: integer("amount").notNull(),
+    isPublicRoom: boolean("is_public_room").notNull().default(true),
+    maxUsers: integer("max_users").notNull(),
+    minWpm: integer("min_wpm").notNull().default(0),
+    isActiveRoom: boolean("is_active_room").default(true),
+    participantsIds: text("participants_ids")
+      .array()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (room) => ({
+    isActiveRoomIdx: index("is_active_room_idx").on(room.isActiveRoom),
+  }),
+);
+
+export const usersRelations = relations(users, ({ one, many }) => ({
   tests: many(tests),
+  roomParticipant: one(rooms, {
+    fields: [users.id],
+    references: [rooms.participantsIds],
+  }),
+  roomCreator: one(rooms, {
+    fields: [users.id],
+    references: [rooms.creatorId],
+  }),
 }));
 
 export const testsRelations = relations(tests, ({ one }) => ({
@@ -103,5 +137,10 @@ export const testsRelations = relations(tests, ({ one }) => ({
   }),
 }));
 
+export const roomsRelations = relations(rooms, ({ many }) => ({
+  users: many(users),
+}));
+
 export type Test = InferModel<typeof tests>;
 export type User = InferModel<typeof users>;
+export type Room = InferModel<typeof rooms>;
