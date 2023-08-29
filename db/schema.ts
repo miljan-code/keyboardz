@@ -107,10 +107,8 @@ export const rooms = pgTable(
     maxUsers: integer("max_users").notNull(),
     minWpm: integer("min_wpm").notNull().default(0),
     isActiveRoom: boolean("is_active_room").default(true),
-    participantsIds: text("participants_ids")
-      .array()
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    participantsIds: text("participants_ids").array().notNull(),
+    // .references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (room) => ({
@@ -120,11 +118,11 @@ export const rooms = pgTable(
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   tests: many(tests),
-  roomParticipant: one(rooms, {
+  enteredRoom: one(rooms, {
     fields: [users.id],
     references: [rooms.participantsIds],
   }),
-  roomCreator: one(rooms, {
+  createdRoom: one(rooms, {
     fields: [users.id],
     references: [rooms.creatorId],
   }),
@@ -137,8 +135,12 @@ export const testsRelations = relations(tests, ({ one }) => ({
   }),
 }));
 
-export const roomsRelations = relations(rooms, ({ many }) => ({
-  users: many(users),
+export const roomsRelations = relations(rooms, ({ one, many }) => ({
+  participants: many(users),
+  creator: one(users, {
+    fields: [rooms.creatorId],
+    references: [users.id],
+  }),
 }));
 
 export type Test = InferModel<typeof tests>;

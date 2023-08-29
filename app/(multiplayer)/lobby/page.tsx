@@ -1,6 +1,11 @@
+import { getOpenRooms } from "@/lib/queries";
 import { TestRooms } from "@/components/lobby/test-rooms";
 
+export type RoomWithCreator = Awaited<ReturnType<typeof getOpenRooms>>[number];
+
 export default async function LobbyPage() {
+  const rooms = await getOpenRooms();
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col max-md:gap-2 md:flex-row md:items-end md:justify-between">
@@ -21,7 +26,7 @@ export default async function LobbyPage() {
           </p>
         </div>
       </div>
-      <TestRooms />
+      <TestRooms initialRooms={rooms} />
     </div>
   );
 }

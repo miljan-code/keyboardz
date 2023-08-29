@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { and, desc, eq, gte } from "drizzle-orm";
 
 import { daysAgo } from "@/lib/utils";
-import { tests, users, type Test, type User } from "@/db/schema";
+import { rooms, tests, users, type Test, type User } from "@/db/schema";
 import {
   leaderboardCategories,
   LIMIT_PER_PAGE,
@@ -68,7 +68,7 @@ export async function getUserStats(userId: User["id"]) {
     (result) => result.userId === userId,
   );
 
-  const bestScore = leaderboardData[leaderboardRank].wpm;
+  const bestScore = leaderboardData[leaderboardRank]?.wpm || 0;
 
   const [timerScores, wordScores] = getMaxResultsForCategories(
     userDataAndTests.tests,
@@ -82,6 +82,15 @@ export async function getUserStats(userId: User["id"]) {
     timerScores,
     wordScores,
   };
+}
+
+export async function getOpenRooms() {
+  return await db.query.rooms.findMany({
+    where: and(eq(rooms.isActiveRoom, true), eq(rooms.isPublicRoom, true)),
+    with: {
+      creator: true,
+    },
+  });
 }
 
 function getMaxResultsForCategories(

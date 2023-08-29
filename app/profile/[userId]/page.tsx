@@ -3,11 +3,11 @@ import { db } from "@/db";
 import { eq } from "drizzle-orm";
 
 import { getUserStats } from "@/lib/queries";
-import { formatDate } from "@/lib/utils";
+import { formatDate, generateFallback } from "@/lib/utils";
 import { users, type User } from "@/db/schema";
 import { Icons } from "@/components/icons";
 import { WpmStatsBox } from "@/components/profile/wpm-stats-box";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 
 interface UserPageProps {
@@ -47,6 +47,9 @@ export default async function UserPage({ params }: UserPageProps) {
         <div className="flex flex-wrap items-center gap-4 border-r px-6 py-4 sm:flex-nowrap">
           <Avatar className="h-16 w-16 sm:h-24 sm:w-24">
             <AvatarImage src={data.user.image || ""} />
+            <AvatarFallback>
+              {generateFallback(data.user.name || "")}
+            </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <h3 className="truncate font-heading text-xl sm:text-3xl">

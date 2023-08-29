@@ -11,5 +11,5 @@ export const createRoomSchema = testModeFormSchema.extend({
     .max(32),
   maxUsers: z.coerce.number().min(2).max(8),
   isPublic: z.boolean(),
-  minWpm: z.coerce.number().optional(),
+  minWpm: z.coerce.number(),
 });

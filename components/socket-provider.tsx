@@ -1,30 +1,28 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSetAtom } from "jotai";
-import { io } from "socket.io-client";
-
-import { socketAtom } from "@/lib/store/socket-store";
+import { useQueryClient } from "@tanstack/react-query";
+import { io as ClientIO } from "socket.io-client";
 
 interface SocketProviderProps {
   children: React.ReactNode;
 }
 
 export const SocketProvider = ({ children }: SocketProviderProps) => {
-  const setSocket = useSetAtom(socketAtom);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_SITE_URL, {
+    const socket = new (ClientIO as any)(process.env.NEXT_PUBLIC_SITE_URL, {
       path: "/api/socket/io",
+      addTrailingSlash: false,
     });
 
-    setSocket(socket);
+    socket.on("createdRoom", () => {
+      queryClient.refetchQueries({ queryKey: ["test-rooms"] });
+    });
 
-    return () => {
-      socket.disconnect();
-      setSocket(null);
-    };
-  }, [setSocket]);
+    if (socket) return () => socket.disconnect();
+  }, [queryClient]);
 
   return <>{children}</>;
 };
