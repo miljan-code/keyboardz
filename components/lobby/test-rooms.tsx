@@ -27,11 +27,11 @@ export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
   return (
     <div>
       <div className="flex justify-between px-4 py-2 text-sm text-muted-foreground">
-        <div className="flex-1">Room name</div>
-        <div className="flex-1">Host</div>
-        <div className="flex-1">Test mode</div>
-        <div className="flex-1">Minimum WPM</div>
-        <div className="flex flex-1 justify-end">Users</div>
+        <div className="hidden flex-1 lg:block">Room name</div>
+        <div className="sm:max-md:mr-6 md:mr-0 md:flex-1">Host</div>
+        <div className="sm:flex-1">Test mode</div>
+        <div className="hidden flex-1 sm:block">Minimum WPM</div>
+        <div className="flex justify-end sm:flex-1">Users</div>
       </div>
       <div className="h-80 overflow-y-auto rounded-md bg-foreground/5">
         {rooms.length ? (
@@ -39,13 +39,13 @@ export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
         ) : (
           <>
             <span className="text-muted-foreground max-sm:text-center">
-              There are no open rooms to join a multiplayer test
+              There are no open public rooms to join a multiplayer test. You can
+              still join private ones or create a new room.
             </span>
-            <CreateRoom />
           </>
         )}
       </div>
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row sm:gap-0">
         <div className="flex gap-2">
           <Input type="text" placeholder="Enter private room ID" />
           <Button variant="secondary">Join</Button>
