@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
 
+import { getSession } from "@/lib/auth";
 import { cn, generateFallback } from "@/lib/utils";
 import { rooms } from "@/db/schema";
 import { Icons } from "@/components/icons";
@@ -25,9 +26,11 @@ interface RoomPageProps {
 }
 
 export default async function RoomPage({ params: { roomId } }: RoomPageProps) {
+  const session = await getSession();
   const room = await getRoomById(roomId);
 
   if (!room) redirect("/lobby");
+  if (!session) redirect("/");
 
   const roomIsFull = room.participants.length === room.maxUsers;
 
@@ -96,7 +99,7 @@ export default async function RoomPage({ params: { roomId } }: RoomPageProps) {
             <span>{room.isPublicRoom ? "Public" : "Private"}</span>
           </div>
         </div>
-        <Room room={room} />
+        <Room initialRoomData={room} session={session} />
       </div>
     </div>
   );

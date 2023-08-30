@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -8,6 +9,7 @@ import { z } from "zod";
 
 import { cn } from "@/lib/utils";
 import { createRoomSchema } from "@/lib/validations/create-room-schema";
+import type { Room } from "@/db/schema";
 import { leaderboardCategories } from "@/config/leaderboard";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,6 +54,8 @@ export const CreateRoom = () => {
     },
   });
 
+  const router = useRouter();
+
   const mode = form.watch("mode");
   const formAmount = form.watch("amount");
   const isChecked = form.watch("isPublic");
@@ -74,8 +78,9 @@ export const CreateRoom = () => {
 
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (room: Room) => {
       setIsOpen(false);
+      router.push(`/lobby/${room.id}`);
     },
     onError: () => {
       return toast({

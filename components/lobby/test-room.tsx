@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 
 import { generateFallback } from "@/lib/utils";
@@ -9,8 +12,15 @@ interface TestRoomProps {
 }
 
 export const TestRoom = ({ room }: TestRoomProps) => {
+  const router = useRouter();
+
+  const handleJoinRoom = () => router.push(`/lobby/${room.id}`);
+
   return (
-    <div className="flex cursor-pointer items-center justify-between border-b-2 border-background px-4 py-3 transition-colors hover:bg-foreground/10">
+    <div
+      onClick={handleJoinRoom}
+      className="flex cursor-pointer items-center justify-between border-b-2 border-background px-4 py-3 transition-colors hover:bg-foreground/10"
+    >
       <div className="hidden flex-1 lg:flex">
         <span className="truncate text-sm text-primary">{room.roomName}</span>
       </div>
