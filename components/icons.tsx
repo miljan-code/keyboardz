@@ -1,12 +1,14 @@
 import {
   Code,
   GitFork,
+  KeySquare,
   Languages,
   Link,
   Lock,
   LogOut,
   Menu,
   MousePointer,
+  Swords,
   Timer,
   UserCircle,
   X,
@@ -25,6 +27,8 @@ export const Icons = {
   close: X,
   logout: LogOut,
   link: Link,
+  swords: Swords,
+  key: KeySquare,
   logo: ({ ...props }: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
