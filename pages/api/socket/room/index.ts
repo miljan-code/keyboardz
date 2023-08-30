@@ -49,7 +49,7 @@ export default async function handler(
       return selectedRoom;
     });
 
-    res.socket.server.io.emit("createdRoom", room);
+    res.socket.server.io.emit("createdRoom");
 
     return res.status(201).json(room);
   } catch (error) {
