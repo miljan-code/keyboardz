@@ -1,7 +1,9 @@
 import { getOpenRooms } from "@/lib/queries";
 import { TestRooms } from "@/components/lobby/test-rooms";
 
-export type RoomWithCreator = Awaited<ReturnType<typeof getOpenRooms>>[number];
+export type RoomWithParticipants = Awaited<
+  ReturnType<typeof getOpenRooms>
+>[number];
 
 export default async function LobbyPage() {
   const rooms = await getOpenRooms();

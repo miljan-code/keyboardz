@@ -1,6 +1,6 @@
 "use client";
 
-import type { RoomWithCreator } from "@/app/(multiplayer)/lobby/page";
+import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import { useQuery } from "@tanstack/react-query";
 
 import { CreateRoom } from "@/components/lobby/create-room";
@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
 interface TestRoomsProps {
-  initialRooms: RoomWithCreator[];
+  initialRooms: RoomWithParticipants[];
 }
 
 export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
@@ -17,7 +17,7 @@ export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
     queryKey: ["test-rooms"],
     queryFn: async () => {
       const res = await fetch("/api/rooms", { cache: "no-store" });
-      return (await res.json()) as RoomWithCreator[];
+      return (await res.json()) as RoomWithParticipants[];
     },
     initialData: initialRooms,
     refetchOnMount: false,
@@ -38,9 +38,10 @@ export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
           rooms.map((room) => <TestRoom key={room.id} room={room} />)
         ) : (
           <>
-            <span className="text-muted-foreground max-sm:text-center">
-              There are no open public rooms to join a multiplayer test. You can
-              still join private ones or create a new room.
+            <span className="flex h-full items-center justify-center px-6 text-center text-muted-foreground">
+              There are no open public rooms to join a multiplayer test.
+              <br className="hidden md:block" /> You can still join private ones
+              or create a new room.
             </span>
           </>
         )}

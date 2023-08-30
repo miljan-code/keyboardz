@@ -89,6 +89,7 @@ export async function getOpenRooms() {
     where: and(eq(rooms.isActiveRoom, true), eq(rooms.isPublicRoom, true)),
     with: {
       creator: true,
+      participants: true,
     },
   });
 }

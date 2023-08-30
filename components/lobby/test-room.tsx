@@ -1,11 +1,11 @@
-import type { RoomWithCreator } from "@/app/(multiplayer)/lobby/page";
+import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 
 import { generateFallback } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface TestRoomProps {
-  room: RoomWithCreator;
+  room: RoomWithParticipants;
 }
 
 export const TestRoom = ({ room }: TestRoomProps) => {
@@ -44,7 +44,7 @@ export const TestRoom = ({ room }: TestRoomProps) => {
       </div>
       <div className="flex justify-end sm:flex-1">
         <span className="text-sm text-foreground/80">
-          {room.participantsIds.length}/{room.maxUsers}
+          {room.participants.length}/{room.maxUsers}
         </span>
       </div>
     </div>
