@@ -14,7 +14,11 @@ const getRoomById = async (roomId: string) => {
     where: eq(rooms.id, roomId),
     with: {
       creator: true,
-      participants: true,
+      participants: {
+        with: {
+          user: true,
+        },
+      },
     },
   });
 };

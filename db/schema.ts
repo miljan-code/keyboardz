@@ -115,8 +115,8 @@ export const rooms = pgTable(
 );
 
 export const participants = pgTable("participant", {
-  id: text("id").notNull().primaryKey(),
   userId: text("user_id")
+    .primaryKey()
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   roomId: text("room_id")
@@ -132,7 +132,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   participant: one(participants, {
     fields: [users.id],
-    references: [participants.id],
+    references: [participants.userId],
   }),
 }));
 
@@ -148,7 +148,7 @@ export const roomsRelations = relations(rooms, ({ one, many }) => ({
     fields: [rooms.creatorId],
     references: [users.id],
   }),
-  participants: many(users),
+  participants: many(participants),
 }));
 
 export const participantsRelations = relations(participants, ({ one }) => ({
@@ -157,7 +157,7 @@ export const participantsRelations = relations(participants, ({ one }) => ({
     references: [users.id],
   }),
   room: one(rooms, {
-    fields: [participants.userId],
+    fields: [participants.roomId],
     references: [rooms.id],
   }),
 }));

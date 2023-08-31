@@ -26,7 +26,11 @@ export async function GET(req: Request, { params }: HandlerParams) {
       where: eq(rooms.id, params.roomId),
       with: {
         creator: true,
-        participants: true,
+        participants: {
+          with: {
+            user: true,
+          },
+        },
       },
     });
 

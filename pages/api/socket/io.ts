@@ -1,6 +1,5 @@
 import { NextApiRequest } from "next";
 import { db } from "@/db";
-import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
 import { Server as ServerIO, type Socket } from "socket.io";
 
@@ -34,12 +33,15 @@ const io = async (req: NextApiRequest, res: NextApiResponseServerIO) => {
     "connection",
     (socket: Socket<ClientToServerEvents, ServerToClientEvents>) => {
       socket.on("userJoinRoom", async ({ roomId, userId }) => {
+        console.log("Caught event", socket.id);
         const room = await db.query.rooms.findFirst({
           where: eq(rooms.id, roomId),
           with: {
             participants: true,
           },
         });
+
+        console.log("err1");
 
         if (!room) {
           socket.emit("sendNotification", {
@@ -67,11 +69,15 @@ const io = async (req: NextApiRequest, res: NextApiResponseServerIO) => {
           },
         });
 
+        console.log("err2");
+
         if (!user) return;
 
-        const userIsParticipant = db.query.participants.findFirst({
+        const userIsParticipant = await db.query.participants.findFirst({
           where: eq(participants.userId, userId),
         });
+
+        console.log("err3");
 
         if (!!userIsParticipant) {
           socket.emit("sendNotification", {
@@ -82,9 +88,7 @@ const io = async (req: NextApiRequest, res: NextApiResponseServerIO) => {
           return;
         }
 
-        await db
-          .insert(participants)
-          .values({ id: createId(), roomId, userId });
+        await db.insert(participants).values({ roomId, userId });
 
         socket.join(`room-${roomId}`);
 

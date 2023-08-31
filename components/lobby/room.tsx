@@ -24,7 +24,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
       return (await res.json()) as RoomWithParticipants;
     },
     initialData: initialRoomData,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnReconnect: false,
   });
 
@@ -34,27 +34,26 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
       roomId: initialRoomData.id,
     });
 
-    socket.on("updateRoom", () =>
-      queryClient.refetchQueries({ queryKey: [`room-${initialRoomData.id}`] }),
-    );
+    socket.on("updateRoom", ({ roomId }) => {
+      console.log(roomId);
+      queryClient.refetchQueries({ queryKey: [`room-${initialRoomData.id}`] });
+    });
 
-    // Leave Room Handle TODO:
-  }, [room.id, session.user.id, initialRoomData.id]);
-
-  console.log(room.participants);
+    // Leave Room Handle
+  }, [room.id, session.user.id, initialRoomData.id, queryClient]);
 
   return (
     <div className="flex h-96 flex-col rounded-md bg-foreground/5 sm:h-80 sm:flex-row">
       <div className="flex w-full flex-row gap-2 border-background px-4 py-2 max-sm:overflow-x-auto max-sm:border-b-2 sm:w-48 sm:flex-col sm:overflow-y-auto sm:border-r-2">
-        {room.participants?.map((user) => (
-          <div key={user.id} className="flex items-center gap-2">
+        {room.participants?.map((participant) => (
+          <div key={participant.user.id} className="flex items-center gap-2">
             <Avatar className="h-4 w-4">
-              <AvatarImage src={user.image || ""} />
+              <AvatarImage src={participant.user.image || ""} />
               <AvatarFallback>
-                {generateFallback(user.name || "")}
+                {generateFallback(participant.user.name || "")}
               </AvatarFallback>
             </Avatar>
-            <span className="text-sm">{user.name}</span>
+            <span className="text-sm">{participant.user.name}</span>
           </div>
         ))}
       </div>
