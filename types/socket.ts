@@ -7,7 +7,7 @@ export type UserJoinRoomPayload = {
   roomId: Room["id"];
 };
 
-export type SendNotificationPayload = {
+export type NotificationPayload = {
   title: string;
   description: string;
 };
@@ -17,9 +17,10 @@ export type UpdateRoomPayload = {
 };
 
 export interface ServerToClientEvents {
-  createdRoom: () => void;
-  sendNotification: (payload: SendNotificationPayload) => void;
+  updateRoomList: () => void;
+  notification: (payload: NotificationPayload) => void;
   updateRoom: (payload: UpdateRoomPayload) => void;
+  userEnteredRoom: (payload: UpdateRoomPayload) => void;
 }
 
 export interface ClientToServerEvents {

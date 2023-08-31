@@ -2,17 +2,19 @@
 
 import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import { useQuery } from "@tanstack/react-query";
+import type { Session } from "next-auth";
 
 import { CreateRoom } from "@/components/lobby/create-room";
 import { TestRoom } from "@/components/lobby/test-room";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface TestRoomsProps {
   initialRooms: RoomWithParticipants[];
+  session: Session;
 }
 
-export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
+export const TestRooms = ({ initialRooms, session }: TestRoomsProps) => {
   const { data: rooms } = useQuery({
     queryKey: ["test-rooms"],
     queryFn: async () => {
@@ -35,7 +37,9 @@ export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
       </div>
       <div className="h-80 overflow-y-auto rounded-md bg-foreground/5">
         {rooms.length ? (
-          rooms.map((room) => <TestRoom key={room.id} room={room} />)
+          rooms.map((room) => (
+            <TestRoom key={room.id} room={room} session={session} />
+          ))
         ) : (
           <>
             <span className="flex h-full items-center justify-center px-6 text-center text-muted-foreground">
@@ -51,7 +55,7 @@ export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
           <Input type="text" placeholder="Enter private room ID" />
           <Button variant="secondary">Join</Button>
         </div>
-        <CreateRoom />
+        <CreateRoom session={session} />
       </div>
     </div>
   );

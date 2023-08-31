@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { Session } from "next-auth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { socket } from "@/lib/socket";
 import { cn } from "@/lib/utils";
 import { createRoomSchema } from "@/lib/validations/create-room-schema";
 import type { Room } from "@/db/schema";
@@ -39,7 +41,11 @@ import type { TestMode } from "@/types/test";
 
 type CreateRoomFields = z.infer<typeof createRoomSchema>;
 
-export const CreateRoom = () => {
+interface CreateRoomProps {
+  session: Session;
+}
+
+export const CreateRoom = ({ session }: CreateRoomProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const form = useForm<CreateRoomFields>({
@@ -80,7 +86,14 @@ export const CreateRoom = () => {
     },
     onSuccess: (room: Room) => {
       setIsOpen(false);
-      router.push(`/lobby/${room.id}`);
+      socket.emit("userJoinRoom", {
+        userId: session.user.id,
+        roomId: room.id,
+      });
+
+      socket.on("userEnteredRoom", ({ roomId }) => {
+        router.push(`/lobby/${roomId}`);
+      });
     },
     onError: () => {
       return toast({

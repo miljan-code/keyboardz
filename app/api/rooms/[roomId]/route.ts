@@ -1,8 +1,5 @@
-import { db } from "@/db";
-import { eq } from "drizzle-orm";
-
 import { getSession } from "@/lib/auth";
-import { rooms } from "@/db/schema";
+import { getRoomById } from "@/lib/queries";
 
 interface HandlerParams {
   params: {
@@ -22,17 +19,7 @@ export async function GET(req: Request, { params }: HandlerParams) {
       return new Response("Room ID is missing", { status: 422 });
     }
 
-    const data = await db.query.rooms.findFirst({
-      where: eq(rooms.id, params.roomId),
-      with: {
-        creator: true,
-        participants: {
-          with: {
-            user: true,
-          },
-        },
-      },
-    });
+    const data = await getRoomById(params.roomId);
 
     return new Response(JSON.stringify(data), { status: 200 });
   } catch (error) {

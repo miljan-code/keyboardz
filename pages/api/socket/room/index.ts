@@ -1,12 +1,13 @@
 import type { NextApiRequest } from "next";
 import { db } from "@/db";
 import { createId } from "@paralleldrive/cuid2";
+import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import * as z from "zod";
 
 import { authOptions } from "@/lib/auth";
 import { createRoomSchema } from "@/lib/validations/create-room-schema";
-import { rooms } from "@/db/schema";
+import { participants, rooms } from "@/db/schema";
 
 import type { NextApiResponseServerIO } from "@/types/next";
 
@@ -26,6 +27,14 @@ export default async function handler(
       return res.status(401).json({ error: "Not authorized" });
     }
 
+    const participant = await db.query.participants.findFirst({
+      where: eq(participants.userId, session.user.id),
+    });
+
+    if (participant) {
+      return res.status(403).json({ error: "You are already in a room" });
+    }
+
     // Parse data
     const roomData = createRoomSchema.parse(req.body);
 
@@ -34,8 +43,6 @@ export default async function handler(
       .insert(rooms)
       .values({ ...roomData, id: createId(), creatorId: session.user.id })
       .returning();
-
-    res.socket.server.io.emit("createdRoom");
 
     return res.status(201).json(room);
   } catch (error) {

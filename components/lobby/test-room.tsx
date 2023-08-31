@@ -2,19 +2,31 @@
 
 import { useRouter } from "next/navigation";
 import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
+import type { Session } from "next-auth";
 
+import { socket } from "@/lib/socket";
 import { generateFallback } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface TestRoomProps {
   room: RoomWithParticipants;
+  session: Session;
 }
 
-export const TestRoom = ({ room }: TestRoomProps) => {
+export const TestRoom = ({ room, session }: TestRoomProps) => {
   const router = useRouter();
 
-  const handleJoinRoom = () => router.push(`/lobby/${room.id}`);
+  const handleJoinRoom = () => {
+    socket.emit("userJoinRoom", {
+      userId: session.user.id,
+      roomId: room.id,
+    });
+
+    socket.on("userEnteredRoom", ({ roomId }) => {
+      router.push(`/lobby/${roomId}`);
+    });
+  };
 
   return (
     <div

@@ -98,6 +98,20 @@ export async function getOpenRooms() {
   });
 }
 
+export const getRoomById = async (roomId: string) => {
+  return await db.query.rooms.findFirst({
+    where: eq(rooms.id, roomId),
+    with: {
+      creator: true,
+      participants: {
+        with: {
+          user: true,
+        },
+      },
+    },
+  });
+};
+
 function getMaxResultsForCategories(
   tests: Test[],
   categories: LeaderboardCategory[],
