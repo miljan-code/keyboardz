@@ -1,23 +1,25 @@
 "use client";
 
-import type { RoomWithCreator } from "@/app/(multiplayer)/lobby/page";
+import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import { useQuery } from "@tanstack/react-query";
+import type { Session } from "next-auth";
 
 import { CreateRoom } from "@/components/lobby/create-room";
 import { TestRoom } from "@/components/lobby/test-room";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface TestRoomsProps {
-  initialRooms: RoomWithCreator[];
+  initialRooms: RoomWithParticipants[];
+  session: Session;
 }
 
-export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
+export const TestRooms = ({ initialRooms, session }: TestRoomsProps) => {
   const { data: rooms } = useQuery({
     queryKey: ["test-rooms"],
     queryFn: async () => {
       const res = await fetch("/api/rooms", { cache: "no-store" });
-      return (await res.json()) as RoomWithCreator[];
+      return (await res.json()) as RoomWithParticipants[];
     },
     initialData: initialRooms,
     refetchOnMount: false,
@@ -27,30 +29,33 @@ export const TestRooms = ({ initialRooms }: TestRoomsProps) => {
   return (
     <div>
       <div className="flex justify-between px-4 py-2 text-sm text-muted-foreground">
-        <div className="flex-1">Room name</div>
-        <div className="flex-1">Host</div>
-        <div className="flex-1">Test mode</div>
-        <div className="flex-1">Minimum WPM</div>
-        <div className="flex flex-1 justify-end">Users</div>
+        <div className="hidden flex-1 lg:block">Room name</div>
+        <div className="sm:max-md:mr-6 md:mr-0 md:flex-1">Host</div>
+        <div className="sm:flex-1">Test mode</div>
+        <div className="hidden flex-1 sm:block">Minimum WPM</div>
+        <div className="flex justify-end sm:flex-1">Users</div>
       </div>
       <div className="h-80 overflow-y-auto rounded-md bg-foreground/5">
         {rooms.length ? (
-          rooms.map((room) => <TestRoom key={room.id} room={room} />)
+          rooms.map((room) => (
+            <TestRoom key={room.id} room={room} session={session} />
+          ))
         ) : (
           <>
-            <span className="text-muted-foreground max-sm:text-center">
-              There are no open rooms to join a multiplayer test
+            <span className="flex h-full items-center justify-center px-6 text-center text-muted-foreground">
+              There are no open public rooms to join a multiplayer test.
+              <br className="hidden md:block" /> You can still join private ones
+              or create a new room.
             </span>
-            <CreateRoom />
           </>
         )}
       </div>
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row sm:gap-0">
         <div className="flex gap-2">
           <Input type="text" placeholder="Enter private room ID" />
           <Button variant="secondary">Join</Button>
         </div>
-        <CreateRoom />
+        <CreateRoom session={session} />
       </div>
     </div>
   );

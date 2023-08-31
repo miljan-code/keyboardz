@@ -1,8 +1,13 @@
-import { Server as NetServer } from "http";
 import { NextApiRequest } from "next";
-import { Server as ServerIO } from "socket.io";
+import { Server as ServerIO, type Socket } from "socket.io";
 
-import { NextApiResponseServerIO } from "@/types/next";
+import { handleUserJoinRoom } from "@/lib/event-handlers";
+
+import type { NextApiResponseServerIO } from "@/types/next";
+import type {
+  ClientToServerEvents,
+  ServerToClientEvents,
+} from "@/types/socket";
 
 export const config = {
   api: {
@@ -14,16 +19,23 @@ const io = async (req: NextApiRequest, res: NextApiResponseServerIO) => {
   if (!res.socket.server.io) {
     const path = "/api/socket/io";
     console.log(`New Socket.io server... to ${path}`);
-    // adapt Next's net Server to http Server
-    const httpServer: NetServer = res.socket.server as any;
+    const httpServer = res.socket.server;
     const io = new ServerIO(httpServer, {
       path: path,
-      // @ts-ignore
       addTrailingSlash: false,
     });
-    // append SocketIO server to Next.js socket server response
     res.socket.server.io = io;
   }
+
+  res.socket.server.io.on(
+    "connection",
+    (socket: Socket<ClientToServerEvents, ServerToClientEvents>) => {
+      socket.on("userJoinRoom", async (payload) => {
+        handleUserJoinRoom(socket, payload);
+      });
+    },
+  );
+
   res.end();
 };
 

@@ -89,9 +89,28 @@ export async function getOpenRooms() {
     where: and(eq(rooms.isActiveRoom, true), eq(rooms.isPublicRoom, true)),
     with: {
       creator: true,
+      participants: {
+        with: {
+          user: true,
+        },
+      },
     },
   });
 }
+
+export const getRoomById = async (roomId: string) => {
+  return await db.query.rooms.findFirst({
+    where: eq(rooms.id, roomId),
+    with: {
+      creator: true,
+      participants: {
+        with: {
+          user: true,
+        },
+      },
+    },
+  });
+};
 
 function getMaxResultsForCategories(
   tests: Test[],

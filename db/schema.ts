@@ -107,8 +107,6 @@ export const rooms = pgTable(
     maxUsers: integer("max_users").notNull(),
     minWpm: integer("min_wpm").notNull().default(0),
     isActiveRoom: boolean("is_active_room").default(true),
-    participantsIds: text("participants_ids").array().notNull(),
-    // .references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (room) => ({
@@ -116,15 +114,25 @@ export const rooms = pgTable(
   }),
 );
 
+export const participants = pgTable("participant", {
+  userId: text("user_id")
+    .primaryKey()
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  roomId: text("room_id")
+    .notNull()
+    .references(() => rooms.id, { onDelete: "cascade" }),
+});
+
 export const usersRelations = relations(users, ({ one, many }) => ({
   tests: many(tests),
-  enteredRoom: one(rooms, {
-    fields: [users.id],
-    references: [rooms.participantsIds],
-  }),
   createdRoom: one(rooms, {
     fields: [users.id],
     references: [rooms.creatorId],
+  }),
+  participant: one(participants, {
+    fields: [users.id],
+    references: [participants.userId],
   }),
 }));
 
@@ -136,13 +144,25 @@ export const testsRelations = relations(tests, ({ one }) => ({
 }));
 
 export const roomsRelations = relations(rooms, ({ one, many }) => ({
-  participants: many(users),
   creator: one(users, {
     fields: [rooms.creatorId],
     references: [users.id],
+  }),
+  participants: many(participants),
+}));
+
+export const participantsRelations = relations(participants, ({ one }) => ({
+  user: one(users, {
+    fields: [participants.userId],
+    references: [users.id],
+  }),
+  room: one(rooms, {
+    fields: [participants.roomId],
+    references: [rooms.id],
   }),
 }));
 
 export type Test = InferModel<typeof tests>;
 export type User = InferModel<typeof users>;
 export type Room = InferModel<typeof rooms>;
+export type Participant = InferModel<typeof participants>;

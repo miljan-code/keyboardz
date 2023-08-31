@@ -21,3 +21,9 @@ declare module "next-auth" {
     };
   }
 }
+
+declare module "socket.io" {
+  interface ServerOptions {
+    addTrailingSlash: boolean;
+  }
+}

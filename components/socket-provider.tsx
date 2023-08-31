@@ -2,27 +2,34 @@
 
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { io as ClientIO } from "socket.io-client";
+
+import { socket } from "@/lib/socket";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SocketProviderProps {
   children: React.ReactNode;
 }
 
 export const SocketProvider = ({ children }: SocketProviderProps) => {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const socket = new (ClientIO as any)(process.env.NEXT_PUBLIC_SITE_URL, {
-      path: "/api/socket/io",
-      addTrailingSlash: false,
-    });
-
-    socket.on("createdRoom", () => {
+    socket.on("updateRoomList", () => {
       queryClient.refetchQueries({ queryKey: ["test-rooms"] });
     });
 
-    if (socket) return () => socket.disconnect();
-  }, [queryClient]);
+    socket.on("notification", ({ title, description }) => {
+      toast({
+        title,
+        description,
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [queryClient, toast]);
 
   return <>{children}</>;
 };

@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { Session } from "next-auth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { socket } from "@/lib/socket";
 import { cn } from "@/lib/utils";
 import { createRoomSchema } from "@/lib/validations/create-room-schema";
+import type { Room } from "@/db/schema";
 import { leaderboardCategories } from "@/config/leaderboard";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +41,11 @@ import type { TestMode } from "@/types/test";
 
 type CreateRoomFields = z.infer<typeof createRoomSchema>;
 
-export const CreateRoom = () => {
+interface CreateRoomProps {
+  session: Session;
+}
+
+export const CreateRoom = ({ session }: CreateRoomProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const form = useForm<CreateRoomFields>({
@@ -51,6 +59,8 @@ export const CreateRoom = () => {
       minWpm: 0,
     },
   });
+
+  const router = useRouter();
 
   const mode = form.watch("mode");
   const formAmount = form.watch("amount");
@@ -74,8 +84,16 @@ export const CreateRoom = () => {
 
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (room: Room) => {
       setIsOpen(false);
+      socket.emit("userJoinRoom", {
+        userId: session.user.id,
+        roomId: room.id,
+      });
+
+      socket.on("userEnteredRoom", ({ roomId }) => {
+        router.push(`/lobby/${roomId}`);
+      });
     },
     onError: () => {
       return toast({

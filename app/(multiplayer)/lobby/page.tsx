@@ -1,10 +1,16 @@
+import { getSession } from "@/lib/auth";
 import { getOpenRooms } from "@/lib/queries";
 import { TestRooms } from "@/components/lobby/test-rooms";
 
-export type RoomWithCreator = Awaited<ReturnType<typeof getOpenRooms>>[number];
+export type RoomWithParticipants = Awaited<
+  ReturnType<typeof getOpenRooms>
+>[number];
 
 export default async function LobbyPage() {
+  const session = await getSession();
   const rooms = await getOpenRooms();
+
+  if (!session) return null;
 
   return (
     <div className="space-y-8">
@@ -26,7 +32,7 @@ export default async function LobbyPage() {
           </p>
         </div>
       </div>
-      <TestRooms initialRooms={rooms} />
+      <TestRooms initialRooms={rooms} session={session} />
     </div>
   );
 }
