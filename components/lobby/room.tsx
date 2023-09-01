@@ -34,7 +34,12 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
       queryClient.refetchQueries({ queryKey: [`room-${roomId}`] });
     });
 
-    // Leave Room Handle
+    return () => {
+      socket.emit("userLeaveRoom", {
+        userId: session.user.id,
+        roomId: room.id,
+      }); // 2nd aprch could be on pathname change
+    };
   }, [room.id, session.user.id, initialRoomData.id, queryClient]);
 
   const roomIsFull = room.participants.length === room.maxUsers;
