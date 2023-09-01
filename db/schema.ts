@@ -26,6 +26,7 @@ export const users = pgTable(
     github: text("github"),
     x: text("x"),
     website: text("website"),
+    bestScore: integer("best_score").notNull().default(0),
   },
   (user) => ({
     userEmailIdx: index("user_email_idx").on(user.email),

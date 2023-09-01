@@ -1,6 +1,10 @@
 import { getSession } from "@/lib/auth";
 import { getOpenRooms } from "@/lib/queries";
+// import { LobbyStats } from "@/components/lobby/lobby-stats";
 import { TestRooms } from "@/components/lobby/test-rooms";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export type RoomWithParticipants = Awaited<
   ReturnType<typeof getOpenRooms>
@@ -23,14 +27,7 @@ export default async function LobbyPage() {
             Test your typing skills with other users.
           </span>
         </div>
-        <div className="flex gap-3 text-foreground/60 max-md:text-sm">
-          <p>
-            Users online: <span className="text-foreground">14</span>
-          </p>
-          <p>
-            Active tests: <span className="text-foreground">2</span>
-          </p>
-        </div>
+        {/* <LobbyStats /> */}
       </div>
       <TestRooms initialRooms={rooms} session={session} />
     </div>

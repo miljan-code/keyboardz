@@ -56,9 +56,7 @@ export const handleUserJoinRoom = async (
 
   if (!user) return;
 
-  const isAboveMinWpm = user.tests.some((test) => test.wpm >= room.minWpm);
-
-  if (!isAboveMinWpm) {
+  if (user.bestScore < room.minWpm) {
     socket.emit("notification", {
       title: "You have never reached minimum WPM",
       description: `This room is only for users who have reached ${room.minWpm} wpm score.`,
@@ -66,10 +64,6 @@ export const handleUserJoinRoom = async (
 
     return;
   }
-
-  // const userIsParticipant = await db.query.participants.findFirst({
-  //   where: eq(participants.userId, userId),
-  // });
 
   if (user.participant) {
     socket.emit("notification", {

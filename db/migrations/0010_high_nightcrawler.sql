@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "best_score" integer DEFAULT 0 NOT NULL;

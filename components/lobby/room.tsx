@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "next-auth";
@@ -9,6 +10,7 @@ import { socket } from "@/lib/socket";
 import { cn, generateFallback } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "../ui/button";
 
 interface RoomProps {
   session: Session;
@@ -17,6 +19,7 @@ interface RoomProps {
 
 export const Room = ({ initialRoomData, session }: RoomProps) => {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { data: room } = useQuery({
     queryKey: [`room-${initialRoomData.id}`],
@@ -38,7 +41,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
       socket.emit("userLeaveRoom", {
         userId: session.user.id,
         roomId: room.id,
-      }); // 2nd aprch could be on pathname change
+      });
     };
   }, [room.id, session.user.id, initialRoomData.id, queryClient]);
 
@@ -64,17 +67,23 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
             )}
           </span>
         </div>
-        <div className="flex items-center gap-2 text-foreground/60 max-md:text-sm">
-          <span className="text-foreground/60">Users in room:</span>
-          <span className="text-foreground">
-            {room.participants.length}/{room.maxUsers}
-          </span>
-          <span
-            className={cn(
-              "h-3 w-3 rounded-full",
-              roomIsFull ? "bg-green-500" : "bg-yellow-400",
-            )}
-          />
+        <div className="flex h-full flex-col items-end">
+          <div className="flex gap-2">
+            <span className="text-foreground/60">Room ID</span>
+            <span className="text-foreground">{room.id}</span>
+          </div>
+          <div className="flex items-center gap-2 text-foreground/60 max-md:text-sm">
+            <span className="text-foreground/60">Users in room:</span>
+            <span className="text-foreground">
+              {room.participants.length}/{room.maxUsers}
+            </span>
+            <span
+              className={cn(
+                "h-3 w-3 rounded-full",
+                roomIsFull ? "bg-green-500" : "bg-yellow-400",
+              )}
+            />
+          </div>
         </div>
       </div>
       <div>
@@ -127,6 +136,15 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
             ))}
           </div>
           <div className="overflow-y-auto">Right Side</div>
+        </div>
+        <div className="mt-4 flex">
+          <Button
+            onClick={() => router.push("/lobby")}
+            variant="destructive"
+            size="sm"
+          >
+            Leave room
+          </Button>
         </div>
       </div>
     </>
