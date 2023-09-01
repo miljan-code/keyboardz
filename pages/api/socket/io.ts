@@ -1,7 +1,8 @@
 import { NextApiRequest } from "next";
 import { Server as ServerIO, type Socket } from "socket.io";
 
-import { handleUserJoinRoom } from "@/lib/event-handlers";
+import { handleUserJoinRoom } from "@/lib/socket-events/handle-user-join-room";
+import { handleUserLeaveRoom } from "@/lib/socket-events/handle-user-leave-room";
 
 import type { NextApiResponseServerIO } from "@/types/next";
 import type {
@@ -30,8 +31,12 @@ const io = async (req: NextApiRequest, res: NextApiResponseServerIO) => {
   res.socket.server.io.on(
     "connection",
     (socket: Socket<ClientToServerEvents, ServerToClientEvents>) => {
-      socket.on("userJoinRoom", async (payload) => {
+      socket.on("userJoinRoom", (payload) => {
         handleUserJoinRoom(socket, payload);
+      });
+
+      socket.on("userLeaveRoom", (payload) => {
+        handleUserLeaveRoom(socket, payload);
       });
     },
   );

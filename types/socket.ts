@@ -25,4 +25,5 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   userJoinRoom: (payload: UserJoinRoomPayload) => void;
+  userLeaveRoom: (payload: UserJoinRoomPayload) => void;
 }
