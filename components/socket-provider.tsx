@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { socket } from "@/lib/socket";
@@ -13,6 +14,7 @@ interface SocketProviderProps {
 export const SocketProvider = ({ children }: SocketProviderProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   useEffect(() => {
     socket.on("updateRoomList", () => {
@@ -26,10 +28,14 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       });
     });
 
+    socket.on("userEnteredRoom", ({ roomId }) => {
+      router.push(`/lobby/${roomId}`);
+    });
+
     return () => {
       socket.disconnect();
     };
-  }, [queryClient, toast]);
+  }, [queryClient, toast, router]);
 
   return <>{children}</>;
 };

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import type { Session } from "next-auth";
 
@@ -15,16 +14,10 @@ interface TestRoomProps {
 }
 
 export const TestRoom = ({ room, session }: TestRoomProps) => {
-  const router = useRouter();
-
   const handleJoinRoom = () => {
     socket.emit("userJoinRoom", {
       userId: session.user.id,
       roomId: room.id,
-    });
-
-    socket.on("userEnteredRoom", ({ roomId }) => {
-      router.push(`/lobby/${roomId}`);
     });
   };
 

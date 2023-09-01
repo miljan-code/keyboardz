@@ -41,7 +41,12 @@ export default async function handler(
     // Create room
     const [room] = await db
       .insert(rooms)
-      .values({ ...roomData, id: createId(), creatorId: session.user.id })
+      .values({
+        ...roomData,
+        id: createId(),
+        creatorId: session.user.id,
+        isPublicRoom: roomData.isPublic,
+      })
       .returning();
 
     return res.status(201).json(room);

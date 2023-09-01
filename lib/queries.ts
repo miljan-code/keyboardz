@@ -68,7 +68,7 @@ export async function getUserStats(userId: User["id"]) {
     (result) => result.userId === userId,
   );
 
-  const bestScore = leaderboardData[leaderboardRank]?.wpm || 0;
+  const bestScore = userDataAndTests.bestScore;
 
   const [timerScores, wordScores] = getMaxResultsForCategories(
     userDataAndTests.tests,

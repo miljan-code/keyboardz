@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import { useQuery } from "@tanstack/react-query";
 import type { Session } from "next-auth";
 
+import { socket } from "@/lib/socket";
+import type { Room } from "@/db/schema";
 import { CreateRoom } from "@/components/lobby/create-room";
 import { TestRoom } from "@/components/lobby/test-room";
 import { Button } from "@/components/ui/button";
@@ -15,6 +18,8 @@ interface TestRoomsProps {
 }
 
 export const TestRooms = ({ initialRooms, session }: TestRoomsProps) => {
+  const [roomId, setRoomId] = useState<Room["id"]>("");
+
   const { data: rooms } = useQuery({
     queryKey: ["test-rooms"],
     queryFn: async () => {
@@ -25,6 +30,13 @@ export const TestRooms = ({ initialRooms, session }: TestRoomsProps) => {
     refetchOnMount: false,
     refetchOnReconnect: false,
   });
+
+  const handleJoinRoomById = () => {
+    socket.emit("userJoinRoom", {
+      userId: session.user.id,
+      roomId: roomId,
+    });
+  };
 
   return (
     <div>
@@ -52,8 +64,15 @@ export const TestRooms = ({ initialRooms, session }: TestRoomsProps) => {
       </div>
       <div className="mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row sm:gap-0">
         <div className="flex gap-2">
-          <Input type="text" placeholder="Enter private room ID" />
-          <Button variant="secondary">Join</Button>
+          <Input
+            type="text"
+            placeholder="Enter private room ID"
+            value={roomId}
+            onChange={(e) => setRoomId(e.target.value)}
+          />
+          <Button onClick={handleJoinRoomById} variant="secondary">
+            Join
+          </Button>
         </div>
         <CreateRoom session={session} />
       </div>
