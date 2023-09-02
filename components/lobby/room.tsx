@@ -6,9 +6,9 @@ import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "next-auth";
 
-import { socket } from "@/lib/socket";
 import { cn, generateFallback } from "@/lib/utils";
 import { Icons } from "@/components/icons";
+import { useSocket } from "@/components/socket-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "../ui/button";
 import { RoomChat } from "./room-chat";
@@ -21,6 +21,7 @@ interface RoomProps {
 export const Room = ({ initialRoomData, session }: RoomProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const socket = useSocket();
 
   const { data: room } = useQuery({
     queryKey: [`room-${initialRoomData.id}`],
@@ -34,17 +35,17 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
   });
 
   useEffect(() => {
-    socket.on("updateRoom", ({ roomId }) => {
+    socket?.on("updateRoom", ({ roomId }) => {
       queryClient.refetchQueries({ queryKey: [`room-${roomId}`] });
     });
 
     return () => {
-      socket.emit("userLeaveRoom", {
+      socket?.emit("userLeaveRoom", {
         userId: session.user.id,
         roomId: room.id,
       });
     };
-  }, [room.id, session.user.id, initialRoomData.id, queryClient]);
+  }, [room.id, session.user.id, initialRoomData.id, queryClient, socket]);
 
   const roomIsFull = room.participants.length === room.maxUsers;
 
@@ -132,7 +133,9 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
                     {generateFallback(participant.user.name || "")}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm">{participant.user.name}</span>
+                <span className="truncate text-sm">
+                  {participant.user.name}
+                </span>
               </div>
             ))}
           </div>
