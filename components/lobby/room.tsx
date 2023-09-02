@@ -6,11 +6,12 @@ import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "next-auth";
 
-import { socket } from "@/lib/socket";
 import { cn, generateFallback } from "@/lib/utils";
 import { Icons } from "@/components/icons";
+import { useSocket } from "@/components/socket-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "../ui/button";
+import { RoomChat } from "./room-chat";
 
 interface RoomProps {
   session: Session;
@@ -20,6 +21,7 @@ interface RoomProps {
 export const Room = ({ initialRoomData, session }: RoomProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const socket = useSocket();
 
   const { data: room } = useQuery({
     queryKey: [`room-${initialRoomData.id}`],
@@ -33,17 +35,17 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
   });
 
   useEffect(() => {
-    socket.on("updateRoom", ({ roomId }) => {
+    socket?.on("updateRoom", ({ roomId }) => {
       queryClient.refetchQueries({ queryKey: [`room-${roomId}`] });
     });
 
     return () => {
-      socket.emit("userLeaveRoom", {
+      socket?.emit("userLeaveRoom", {
         userId: session.user.id,
         roomId: room.id,
       });
     };
-  }, [room.id, session.user.id, initialRoomData.id, queryClient]);
+  }, [room.id, session.user.id, initialRoomData.id, queryClient, socket]);
 
   const roomIsFull = room.participants.length === room.maxUsers;
 
@@ -73,7 +75,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
             <span className="text-foreground">{room.id}</span>
           </div>
           <div className="flex items-center gap-2 text-foreground/60 max-md:text-sm">
-            <span className="text-foreground/60">Users in room:</span>
+            <span className="text-foreground/60">Users in room</span>
             <span className="text-foreground">
               {room.participants.length}/{room.maxUsers}
             </span>
@@ -118,7 +120,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
             <span>{room.isPublicRoom ? "Public" : "Private"}</span>
           </div>
         </div>
-        <div className="flex h-96 flex-col rounded-md bg-foreground/5 sm:h-80 sm:flex-row">
+        <div className="flex h-96 flex-col overflow-hidden rounded-md bg-foreground/5 sm:h-80 sm:flex-row">
           <div className="flex w-full flex-row gap-2 border-background px-4 py-2 max-sm:overflow-x-auto max-sm:border-b-2 sm:w-48 sm:flex-col sm:overflow-y-auto sm:border-r-2">
             {room.participants?.map((participant) => (
               <div
@@ -131,11 +133,13 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
                     {generateFallback(participant.user.name || "")}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm">{participant.user.name}</span>
+                <span className="truncate text-sm">
+                  {participant.user.name}
+                </span>
               </div>
             ))}
           </div>
-          <div className="overflow-y-auto">Right Side</div>
+          <RoomChat session={session} roomId={initialRoomData.id} />
         </div>
         <div className="mt-4 flex">
           <Button

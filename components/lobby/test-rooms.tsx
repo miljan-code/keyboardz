@@ -5,10 +5,10 @@ import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import { useQuery } from "@tanstack/react-query";
 import type { Session } from "next-auth";
 
-import { socket } from "@/lib/socket";
 import type { Room } from "@/db/schema";
 import { CreateRoom } from "@/components/lobby/create-room";
 import { TestRoom } from "@/components/lobby/test-room";
+import { useSocket } from "@/components/socket-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -19,6 +19,8 @@ interface TestRoomsProps {
 
 export const TestRooms = ({ initialRooms, session }: TestRoomsProps) => {
   const [roomId, setRoomId] = useState<Room["id"]>("");
+
+  const socket = useSocket();
 
   const { data: rooms } = useQuery({
     queryKey: ["test-rooms"],
@@ -32,7 +34,7 @@ export const TestRooms = ({ initialRooms, session }: TestRoomsProps) => {
   });
 
   const handleJoinRoomById = () => {
-    socket.emit("userJoinRoom", {
+    socket?.emit("userJoinRoom", {
       userId: session.user.id,
       roomId: roomId,
     });
