@@ -17,7 +17,10 @@ interface SocketProviderProps {
   children: React.ReactNode;
 }
 
-const socketAtom = atom<Socket | null>(null);
+const socketAtom = atom<Socket<
+  ServerToClientEvents,
+  ClientToServerEvents
+> | null>(null);
 
 export const useSocket = () => {
   return useAtomValue(socketAtom);

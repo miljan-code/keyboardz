@@ -116,8 +116,8 @@ export const rooms = pgTable(
 );
 
 export const participants = pgTable("participant", {
+  id: text("id").notNull().primaryKey(),
   userId: text("user_id")
-    .primaryKey()
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   roomId: text("room_id")

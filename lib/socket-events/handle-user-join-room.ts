@@ -1,4 +1,5 @@
 import { db } from "@/db";
+import { createId } from "@paralleldrive/cuid2";
 import { eq } from "drizzle-orm";
 import type { Socket } from "socket.io";
 
@@ -74,7 +75,7 @@ export const handleUserJoinRoom = async (
     return;
   }
 
-  await db.insert(participants).values({ roomId, userId });
+  await db.insert(participants).values({ id: createId(), roomId, userId });
 
   socket.emit("updateRoomList");
   socket.join(`room-${roomId}`);

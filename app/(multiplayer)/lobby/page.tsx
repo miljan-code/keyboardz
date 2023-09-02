@@ -1,6 +1,6 @@
 import { getSession } from "@/lib/auth";
 import { getOpenRooms } from "@/lib/queries";
-// import { LobbyStats } from "@/components/lobby/lobby-stats";
+import { LobbyStats } from "@/components/lobby/lobby-stats";
 import { TestRooms } from "@/components/lobby/test-rooms";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +27,7 @@ export default async function LobbyPage() {
             Test your typing skills with other users.
           </span>
         </div>
-        {/* <LobbyStats /> */}
+        <LobbyStats />
       </div>
       <TestRooms initialRooms={rooms} session={session} />
     </div>
