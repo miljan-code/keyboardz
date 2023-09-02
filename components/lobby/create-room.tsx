@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Session } from "next-auth";
@@ -60,8 +59,6 @@ export const CreateRoom = ({ session }: CreateRoomProps) => {
     },
   });
 
-  const router = useRouter();
-
   const mode = form.watch("mode");
   const formAmount = form.watch("amount");
   const isChecked = form.watch("isPublic");
@@ -89,10 +86,6 @@ export const CreateRoom = ({ session }: CreateRoomProps) => {
       socket.emit("userJoinRoom", {
         userId: session.user.id,
         roomId: room.id,
-      });
-
-      socket.on("userEnteredRoom", ({ roomId }) => {
-        router.push(`/lobby/${roomId}`);
       });
     },
     onError: () => {

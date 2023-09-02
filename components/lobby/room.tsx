@@ -11,6 +11,7 @@ import { cn, generateFallback } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "../ui/button";
+import { RoomChat } from "./room-chat";
 
 interface RoomProps {
   session: Session;
@@ -73,7 +74,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
             <span className="text-foreground">{room.id}</span>
           </div>
           <div className="flex items-center gap-2 text-foreground/60 max-md:text-sm">
-            <span className="text-foreground/60">Users in room:</span>
+            <span className="text-foreground/60">Users in room</span>
             <span className="text-foreground">
               {room.participants.length}/{room.maxUsers}
             </span>
@@ -118,7 +119,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
             <span>{room.isPublicRoom ? "Public" : "Private"}</span>
           </div>
         </div>
-        <div className="flex h-96 flex-col rounded-md bg-foreground/5 sm:h-80 sm:flex-row">
+        <div className="flex h-96 flex-col overflow-hidden rounded-md bg-foreground/5 sm:h-80 sm:flex-row">
           <div className="flex w-full flex-row gap-2 border-background px-4 py-2 max-sm:overflow-x-auto max-sm:border-b-2 sm:w-48 sm:flex-col sm:overflow-y-auto sm:border-r-2">
             {room.participants?.map((participant) => (
               <div
@@ -135,7 +136,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
               </div>
             ))}
           </div>
-          <div className="overflow-y-auto">Right Side</div>
+          <RoomChat session={session} roomId={initialRoomData.id} />
         </div>
         <div className="mt-4 flex">
           <Button
