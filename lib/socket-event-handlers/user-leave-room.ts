@@ -27,7 +27,7 @@ export const handleUserLeaveRoom = async (
 
   if (!remainingParticipants.length) {
     await db.delete(rooms).where(eq(rooms.id, roomId));
-    socket.emit("updateRoomList");
+    socket.broadcast.emit("updateRoomList");
     return;
   }
 
@@ -39,5 +39,5 @@ export const handleUserLeaveRoom = async (
   }
 
   socket.to(`room-${roomId}`).emit("updateRoom", { roomId });
-  socket.emit("updateRoomList");
+  socket.broadcast.emit("updateRoomList");
 };

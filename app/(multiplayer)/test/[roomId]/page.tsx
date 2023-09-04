@@ -1,4 +1,5 @@
 import { getRoomById } from "@/lib/queries";
+import { ExitTestButton } from "@/components/lobby/exit-test-button";
 import { MutliplayerTest } from "@/components/lobby/multiplayer-test";
 
 import type { TestMode } from "@/types/test";
@@ -23,11 +24,15 @@ export default async function MultiplayerTestPage({
 
   return (
     <div className="grid h-full grid-flow-row grid-rows-[auto_1fr_auto]">
-      <div className="">Other players stats</div>
+      <div className="flex items-center justify-center">
+        Other players stats
+      </div>
       <div className="flex h-full items-center justify-center">
         <MutliplayerTest testMode={testMode} />
       </div>
-      <div className="">Exit test</div>
+      <div className="flex items-center justify-center">
+        <ExitTestButton />
+      </div>
     </div>
   );
 }

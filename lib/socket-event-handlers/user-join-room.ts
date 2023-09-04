@@ -84,7 +84,7 @@ export const handleUserJoinRoom = async (
 
   await db.insert(participants).values({ id: createId(), roomId, userId });
 
-  socket.emit("updateRoomList");
+  socket.broadcast.emit("updateRoomList");
   socket.join(`room-${roomId}`);
   socket.to(`room-${roomId}`).emit("updateRoom", {
     roomId,
