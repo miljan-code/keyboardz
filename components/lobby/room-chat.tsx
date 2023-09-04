@@ -59,10 +59,10 @@ export const RoomChat = ({ session, roomId }: RoomChatProps) => {
   };
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex h-full w-full flex-col">
       <div
         ref={messagesDivRef}
-        className="scroll flex flex-col gap-0.5 overflow-y-auto px-4 py-2"
+        className="scroll flex h-96 flex-col gap-0.5 overflow-y-auto px-4 py-2"
       >
         {messages.map((message, i) => (
           <div

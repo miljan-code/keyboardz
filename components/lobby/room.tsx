@@ -73,7 +73,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
             )}
           </span>
         </div>
-        <div className="flex h-full flex-col items-end">
+        <div className="flex h-full flex-col md:items-end">
           <div className="flex gap-2">
             <span className="text-foreground/60">Room ID</span>
             <span className="text-foreground">{room.id}</span>
@@ -124,8 +124,8 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
             <span>{room.isPublicRoom ? "Public" : "Private"}</span>
           </div>
         </div>
-        <div className="flex h-96 flex-col overflow-hidden rounded-md bg-foreground/5 sm:h-80 sm:flex-row">
-          <div className="flex w-full flex-row gap-2 border-background px-4 py-2 max-sm:overflow-x-auto max-sm:border-b-2 sm:w-48 sm:flex-col sm:overflow-y-auto sm:border-r-2">
+        <div className="flex flex-col overflow-hidden rounded-md bg-foreground/5 sm:h-80 sm:flex-row">
+          <div className="flex h-full w-full flex-row gap-2 border-background px-4 py-2 max-sm:overflow-x-auto max-sm:border-b-2 sm:w-48 sm:flex-col sm:overflow-y-auto sm:border-r-2">
             {room.participants?.map((participant) => (
               <div
                 key={participant.user.id}
