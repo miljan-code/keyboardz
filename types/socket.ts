@@ -13,8 +13,12 @@ export type NotificationPayload = {
   description: string;
 };
 
-export type UpdateRoomPayload = {
+export type RoomIdPayload = {
   roomId: Room["id"];
+};
+
+export type RoomPayload = {
+  room: Room;
 };
 
 export type MessagePayload = {
@@ -23,16 +27,23 @@ export type MessagePayload = {
   roomId: Room["id"];
 };
 
+export type StartGamePayload = {
+  text: string;
+  roomId: string;
+};
+
 export interface ServerToClientEvents {
   updateRoomList: () => void;
   notification: (payload: NotificationPayload) => void;
-  updateRoom: (payload: UpdateRoomPayload) => void;
-  userEnteredRoom: (payload: UpdateRoomPayload) => void;
+  updateRoom: (payload: RoomIdPayload) => void;
+  userEnteredRoom: (payload: RoomIdPayload) => void;
   newMessage: (payload: Message) => void;
+  startGame: (payload: StartGamePayload) => void;
 }
 
 export interface ClientToServerEvents {
   userJoinRoom: (payload: UserJoinRoomPayload) => void;
   userLeaveRoom: (payload: UserJoinRoomPayload) => void;
   sendMessage: (payload: MessagePayload) => void;
+  startGame: (payload: RoomPayload) => void;
 }

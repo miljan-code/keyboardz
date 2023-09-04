@@ -81,7 +81,12 @@ export const RoomChat = ({ session, roomId }: RoomChatProps) => {
           className="rounded-none border-none bg-foreground/10 focus-visible:ring-0"
           placeholder="Enter a message"
         />
-        <Button type="submit" className="h-auto rounded-none" size="sm">
+        <Button
+          type="submit"
+          className="h-auto rounded-none"
+          size="sm"
+          variant="secondary"
+        >
           Send
         </Button>
       </form>

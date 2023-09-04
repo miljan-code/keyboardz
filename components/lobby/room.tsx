@@ -8,10 +8,10 @@ import type { Session } from "next-auth";
 
 import { cn, generateFallback } from "@/lib/utils";
 import { Icons } from "@/components/icons";
+import { RoomChat } from "@/components/lobby/room-chat";
 import { useSocket } from "@/components/socket-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "../ui/button";
-import { RoomChat } from "./room-chat";
+import { Button } from "@/components/ui/button";
 
 interface RoomProps {
   session: Session;
@@ -40,14 +40,18 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
     });
 
     return () => {
-      socket?.emit("userLeaveRoom", {
-        userId: session.user.id,
-        roomId: room.id,
-      });
+      // socket?.emit("userLeaveRoom", {
+      //   userId: session.user.id,
+      //   roomId: room.id,
+      // });
     };
-  }, [room.id, session.user.id, initialRoomData.id, queryClient, socket]);
+  }, [room.id, session.user.id, queryClient, socket]);
 
   const roomIsFull = room.participants.length === room.maxUsers;
+
+  const handleStartTest = () => {
+    socket?.emit("startGame", { room });
+  };
 
   return (
     <>
@@ -141,7 +145,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
           </div>
           <RoomChat session={session} roomId={initialRoomData.id} />
         </div>
-        <div className="mt-4 flex">
+        <div className="mt-4 flex justify-between">
           <Button
             onClick={() => router.push("/lobby")}
             variant="destructive"
@@ -149,6 +153,11 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
           >
             Leave room
           </Button>
+          {session.user.id === room.creatorId && (
+            <Button onClick={handleStartTest} size="sm">
+              Start test
+            </Button>
+          )}
         </div>
       </div>
     </>

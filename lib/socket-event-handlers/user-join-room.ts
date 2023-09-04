@@ -37,6 +37,13 @@ export const handleUserJoinRoom = async (
     return;
   }
 
+  if (!room.isActiveRoom) {
+    socket.emit("notification", {
+      title: "Room is closed",
+      description: "The test has already started.",
+    });
+  }
+
   if (room.participants.length === room.maxUsers) {
     socket.emit("notification", {
       title: "Room is full",

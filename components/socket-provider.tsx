@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { io, Socket } from "socket.io-client";
 
+import { multiplayerTextAtom } from "@/lib/store/multiplayer-store";
 import { useToast } from "@/components/ui/use-toast";
 
 import type {
@@ -31,6 +32,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const setSocket = useSetAtom(socketAtom);
+  const setMultiplayerText = useSetAtom(multiplayerTextAtom);
 
   useEffect(() => {
     const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
@@ -58,10 +60,15 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       router.push(`/lobby/${roomId}`);
     });
 
+    socket.on("startGame", ({ text, roomId }) => {
+      setMultiplayerText(text);
+      router.push(`/test/${roomId}`);
+    });
+
     return () => {
       socket.disconnect();
     };
-  }, [queryClient, toast, router, setSocket]);
+  }, [queryClient, toast, router, setSocket, setMultiplayerText]);
 
   return <>{children}</>;
 };
