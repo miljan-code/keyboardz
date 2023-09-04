@@ -3,6 +3,7 @@ import { Server as ServerIO, type Socket } from "socket.io";
 
 import { handleSendMessage } from "@/lib/socket-event-handlers/send-message";
 import { handleStartTest } from "@/lib/socket-event-handlers/start-test";
+import { handleSubmitResult } from "@/lib/socket-event-handlers/submit-result";
 import { handleUserJoinRoom } from "@/lib/socket-event-handlers/user-join-room";
 import { handleUserLeaveRoom } from "@/lib/socket-event-handlers/user-leave-room";
 
@@ -47,6 +48,10 @@ const io = async (req: NextApiRequest, res: NextApiResponseServerIO) => {
 
       socket.on("startGame", (payload) => {
         handleStartTest(socket, payload);
+      });
+
+      socket.on("submitResult", (payload) => {
+        handleSubmitResult(socket, payload);
       });
     },
   );

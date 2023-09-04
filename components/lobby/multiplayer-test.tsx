@@ -10,6 +10,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { currentTextAtom } from "@/lib/store";
 import { multiplayerTextAtom } from "@/lib/store/multiplayer-store";
 import { cn } from "@/lib/utils";
+import type { Room } from "@/db/schema";
 import { MultiplayerResults } from "@/components/lobby/multiplayer-results";
 import { TestInfo } from "@/components/test/test-info";
 
@@ -19,9 +20,10 @@ const MAX_WRONG_LETTERS = 8;
 
 interface MutliplayerTestProps {
   testMode: TestMode;
+  roomId: Room["id"];
 }
 
-export const MutliplayerTest = ({ testMode }: MutliplayerTestProps) => {
+export const MutliplayerTest = ({ testMode, roomId }: MutliplayerTestProps) => {
   const [testFinished, setTestFinished] = useState(false);
   const [testStarted, setTestStarted] = useState(false);
   const [letters, setLetters] = useState<string[]>([]);
@@ -164,10 +166,6 @@ export const MutliplayerTest = ({ testMode }: MutliplayerTestProps) => {
   };
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && e.ctrlKey) {
-      updateCaret("resize");
-    }
-
     // Checks if test is finished
     if (
       e.currentTarget.value.length === letters.length &&
@@ -180,7 +178,9 @@ export const MutliplayerTest = ({ testMode }: MutliplayerTestProps) => {
   };
 
   if (testFinished) {
-    return <MultiplayerResults />;
+    return (
+      <MultiplayerResults text={text} testMode={testMode} roomId={roomId} />
+    );
   }
 
   return (

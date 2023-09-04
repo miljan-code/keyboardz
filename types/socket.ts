@@ -3,6 +3,8 @@ import type { Session } from "next-auth";
 import type { Room } from "@/db/schema";
 import type { Message } from "@/components/lobby/room-chat";
 
+import type { TestMode, WpmStats } from "@/types/test";
+
 export type UserJoinRoomPayload = {
   userId: Session["user"]["id"];
   roomId: Room["id"];
@@ -32,6 +34,19 @@ export type StartGamePayload = {
   roomId: string;
 };
 
+export type SubmitResultPayload = {
+  text: string;
+  testMode: TestMode;
+  roomId: Room["id"];
+  user: Session["user"];
+  wpmStats: WpmStats;
+};
+
+export type UpdateResultsPayload = Pick<
+  SubmitResultPayload,
+  "user" | "wpmStats"
+>;
+
 export interface ServerToClientEvents {
   updateRoomList: () => void;
   notification: (payload: NotificationPayload) => void;
@@ -39,6 +54,7 @@ export interface ServerToClientEvents {
   userEnteredRoom: (payload: RoomIdPayload) => void;
   newMessage: (payload: Message) => void;
   startGame: (payload: StartGamePayload) => void;
+  updateResults: (payload: UpdateResultsPayload) => void;
 }
 
 export interface ClientToServerEvents {
@@ -46,4 +62,5 @@ export interface ClientToServerEvents {
   userLeaveRoom: (payload: UserJoinRoomPayload) => void;
   sendMessage: (payload: MessagePayload) => void;
   startGame: (payload: RoomPayload) => void;
+  submitResult: (payload: SubmitResultPayload) => void;
 }

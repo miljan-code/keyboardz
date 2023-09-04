@@ -28,7 +28,7 @@ export default async function MultiplayerTestPage({
         Other players stats
       </div>
       <div className="flex h-full items-center justify-center">
-        <MutliplayerTest testMode={testMode} />
+        <MutliplayerTest testMode={testMode} roomId={room.id} />
       </div>
       <div className="flex items-center justify-center">
         <ExitTestButton />
