@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useWpm } from "@/hooks/use-wpm";
-import type { User } from "next-auth";
+import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
 import { generateFallback } from "@/lib/utils";
-import type { Room } from "@/db/schema";
+import type { MultiplayerScore, Room, User } from "@/db/schema";
 import { useSocket } from "@/components/socket-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import type { TestMode, WpmStats } from "@/types/test";
+import type { TestMode } from "@/types/test";
 
 interface MultiplayerResultsProps {
   text: string;
@@ -18,17 +18,22 @@ interface MultiplayerResultsProps {
   roomId: Room["id"];
 }
 
-type Result = {
+interface ScoreWithUser extends MultiplayerScore {
   user: User;
-  wpmStats: WpmStats;
-};
+}
 
 export const MultiplayerResults = ({
   text,
   testMode,
   roomId,
 }: MultiplayerResultsProps) => {
-  const [results, setResults] = useState<Result[]>([]);
+  const { data: results, refetch } = useQuery({
+    queryKey: [`results-${roomId}`],
+    queryFn: async () => {
+      const res = await fetch(`/api/result/${roomId}`);
+      return (await res.json()) as ScoreWithUser[];
+    },
+  });
 
   const { wpmStats } = useWpm({ text });
   const { data: session } = useSession();
@@ -53,14 +58,12 @@ export const MultiplayerResults = ({
 
   // Catch results
   useEffect(() => {
-    socket?.on("updateResults", (result) => {
-      setResults((prev) => [...prev, result]);
-    });
-  }, [socket]);
+    socket?.on("updateResults", () => refetch());
+  }, [socket, refetch]);
 
   const sortedResults = useMemo(() => {
-    const resultsArr = [...results];
-    return resultsArr.sort((a, b) => b.wpmStats.wpm - a.wpmStats.wpm);
+    const resultsArr = [...(results || [])];
+    return resultsArr.sort((a, b) => b.wpm - a.wpm);
   }, [results]);
 
   return (
@@ -86,19 +89,19 @@ export const MultiplayerResults = ({
             <div>
               <span className="text-foreground/80">WPM</span>
               <h3 className="text-5xl font-semibold text-primary">
-                {result.wpmStats.wpm}
+                {result.wpm}
               </h3>
             </div>
             <div>
               <span className="text-foreground/80">Raw</span>
               <h3 className="text-5xl font-semibold text-primary">
-                {result.wpmStats.rawWpm}
+                {result.rawWpm}
               </h3>
             </div>
             <div>
               <span className="text-foreground/80">Accuracy</span>
               <h3 className="text-5xl font-semibold text-primary">
-                {result.wpmStats.accuracy}
+                {result.accuracy}
               </h3>
             </div>
           </div>

@@ -125,22 +125,25 @@ export const participants = pgTable("participant", {
     .references(() => rooms.id, { onDelete: "cascade" }),
 });
 
-export const multiplayerScores = pgTable("multiplayer_score", {
-  id: serial("id").notNull().primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  roomId: text("room_id")
-    .notNull()
-    .references(() => rooms.id, { onDelete: "cascade" }),
-  participantId: text("participant_id")
-    .notNull()
-    .references(() => participants.id, { onDelete: "cascade" }),
-  wpm: integer("wpm").notNull(),
-  rawWpm: integer("raw_wpm").notNull(),
-  accuracy: integer("accuracy").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+export const multiplayerScores = pgTable(
+  "multiplayer_score",
+  {
+    id: serial("id").notNull().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    roomId: text("room_id")
+      .notNull()
+      .references(() => rooms.id, { onDelete: "cascade" }),
+    wpm: integer("wpm").notNull(),
+    rawWpm: integer("raw_wpm").notNull(),
+    accuracy: integer("accuracy").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (multiplayerScore) => ({
+    roomIdIdx: index("room_id_idx").on(multiplayerScore.roomId),
+  }),
+);
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   tests: many(tests),
@@ -180,10 +183,6 @@ export const participantsRelations = relations(participants, ({ one }) => ({
     fields: [participants.roomId],
     references: [rooms.id],
   }),
-  multiplayerScore: one(multiplayerScores, {
-    fields: [participants.id],
-    references: [multiplayerScores.participantId],
-  }),
 }));
 
 export const multiplayerScoresRelations = relations(
@@ -196,10 +195,6 @@ export const multiplayerScoresRelations = relations(
     room: one(rooms, {
       fields: [multiplayerScores.roomId],
       references: [rooms.id],
-    }),
-    participant: one(participants, {
-      fields: [multiplayerScores.participantId],
-      references: [participants.id],
     }),
   }),
 );

@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "room_id_idx" ON "multiplayer_score" ("room_id");
