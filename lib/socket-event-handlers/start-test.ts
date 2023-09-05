@@ -32,6 +32,21 @@ export const handleStartTest = async (
 
   const text = generateTextByMode(testMode);
 
+  // start counter
+  let time = 5;
+  const counterInterval = setInterval(() => {
+    if (time === 1) clearInterval(counterInterval);
+    socket.to(`room-${room.id}`).emit("newMessage", {
+      username: `Game starts in ${time}`,
+      message: "",
+    });
+    socket.emit("newMessage", {
+      username: `Game starts in ${time}`,
+      message: "",
+    });
+    time--;
+  }, 1000);
+
   // Emit event
   socket.to(`room-${room.id}`).emit("startGame", { text, roomId: room.id });
   socket.emit("startGame", { text, roomId: room.id });

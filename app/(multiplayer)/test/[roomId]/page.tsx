@@ -23,7 +23,7 @@ export default async function MultiplayerTestPage({
   };
 
   return (
-    <div className="grid h-full grid-flow-row grid-rows-[auto_1fr_auto]">
+    <div className="grid h-full grid-flow-row grid-rows-[auto_1fr_auto] gap-8">
       <div className="flex items-center justify-center">
         Other players stats
       </div>

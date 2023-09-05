@@ -125,6 +125,23 @@ export const participants = pgTable("participant", {
     .references(() => rooms.id, { onDelete: "cascade" }),
 });
 
+export const multiplayerScores = pgTable("multiplayer_score", {
+  id: serial("id").notNull().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  roomId: text("room_id")
+    .notNull()
+    .references(() => rooms.id, { onDelete: "cascade" }),
+  participantId: text("participant_id")
+    .notNull()
+    .references(() => participants.id, { onDelete: "cascade" }),
+  wpm: integer("wpm").notNull(),
+  rawWpm: integer("raw_wpm").notNull(),
+  accuracy: integer("accuracy").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const usersRelations = relations(users, ({ one, many }) => ({
   tests: many(tests),
   createdRoom: one(rooms, {
@@ -135,6 +152,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.id],
     references: [participants.userId],
   }),
+  multiplayerScores: many(multiplayerScores),
 }));
 
 export const testsRelations = relations(tests, ({ one }) => ({
@@ -150,6 +168,7 @@ export const roomsRelations = relations(rooms, ({ one, many }) => ({
     references: [users.id],
   }),
   participants: many(participants),
+  multiplayerScores: many(multiplayerScores),
 }));
 
 export const participantsRelations = relations(participants, ({ one }) => ({
@@ -161,9 +180,32 @@ export const participantsRelations = relations(participants, ({ one }) => ({
     fields: [participants.roomId],
     references: [rooms.id],
   }),
+  multiplayerScore: one(multiplayerScores, {
+    fields: [participants.id],
+    references: [multiplayerScores.participantId],
+  }),
 }));
+
+export const multiplayerScoresRelations = relations(
+  multiplayerScores,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [multiplayerScores.userId],
+      references: [users.id],
+    }),
+    room: one(rooms, {
+      fields: [multiplayerScores.roomId],
+      references: [rooms.id],
+    }),
+    participant: one(participants, {
+      fields: [multiplayerScores.participantId],
+      references: [participants.id],
+    }),
+  }),
+);
 
 export type Test = InferModel<typeof tests>;
 export type User = InferModel<typeof users>;
 export type Room = InferModel<typeof rooms>;
 export type Participant = InferModel<typeof participants>;
+export type MultiplayerScore = InferModel<typeof multiplayerScores>;
