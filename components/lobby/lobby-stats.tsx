@@ -11,7 +11,7 @@ export const LobbyStats = () => {
   const { data } = useQuery({
     queryKey: ["updateActiveUsers"],
     queryFn: async () => {
-      const res = await fetch("/api/socket/users");
+      const res = await fetch("/api/socket/active-data");
       return (await res.json()) as OnlineData;
     },
   });

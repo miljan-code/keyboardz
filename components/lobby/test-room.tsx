@@ -6,7 +6,7 @@ import type { Session } from "next-auth";
 import { generateFallback } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { useSocket } from "@/components/socket-provider";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface TestRoomProps {
   room: RoomWithParticipants;

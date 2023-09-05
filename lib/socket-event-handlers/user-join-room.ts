@@ -37,6 +37,13 @@ export const handleUserJoinRoom = async (
     return;
   }
 
+  if (!room.isActiveRoom) {
+    socket.emit("notification", {
+      title: "Room is closed",
+      description: "The test has already started.",
+    });
+  }
+
   if (room.participants.length === room.maxUsers) {
     socket.emit("notification", {
       title: "Room is full",
@@ -77,7 +84,7 @@ export const handleUserJoinRoom = async (
 
   await db.insert(participants).values({ id: createId(), roomId, userId });
 
-  socket.emit("updateRoomList");
+  socket.broadcast.emit("updateRoomList");
   socket.join(`room-${roomId}`);
   socket.to(`room-${roomId}`).emit("updateRoom", {
     roomId,

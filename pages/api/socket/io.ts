@@ -1,9 +1,11 @@
 import { NextApiRequest } from "next";
 import { Server as ServerIO, type Socket } from "socket.io";
 
-import { handleSendMessage } from "@/lib/socket-events/handle-send-message";
-import { handleUserJoinRoom } from "@/lib/socket-events/handle-user-join-room";
-import { handleUserLeaveRoom } from "@/lib/socket-events/handle-user-leave-room";
+import { handleSendMessage } from "@/lib/socket-event-handlers/send-message";
+import { handleStartTest } from "@/lib/socket-event-handlers/start-test";
+import { handleSubmitResult } from "@/lib/socket-event-handlers/submit-result";
+import { handleUserJoinRoom } from "@/lib/socket-event-handlers/user-join-room";
+import { handleUserLeaveRoom } from "@/lib/socket-event-handlers/user-leave-room";
 
 import type { NextApiResponseServerIO } from "@/types/next";
 import type {
@@ -42,6 +44,14 @@ const io = async (req: NextApiRequest, res: NextApiResponseServerIO) => {
 
       socket.on("sendMessage", (payload) => {
         handleSendMessage(socket, payload);
+      });
+
+      socket.on("startGame", (payload) => {
+        handleStartTest(socket, payload);
+      });
+
+      socket.on("submitResult", (payload) => {
+        handleSubmitResult(socket, payload);
       });
     },
   );

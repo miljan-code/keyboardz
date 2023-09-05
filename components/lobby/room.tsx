@@ -8,10 +8,10 @@ import type { Session } from "next-auth";
 
 import { cn, generateFallback } from "@/lib/utils";
 import { Icons } from "@/components/icons";
+import { RoomChat } from "@/components/lobby/room-chat";
 import { useSocket } from "@/components/socket-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "../ui/button";
-import { RoomChat } from "./room-chat";
+import { Button } from "@/components/ui/button";
 
 interface RoomProps {
   session: Session;
@@ -40,14 +40,18 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
     });
 
     return () => {
-      socket?.emit("userLeaveRoom", {
-        userId: session.user.id,
-        roomId: room.id,
-      });
+      // socket?.emit("userLeaveRoom", {
+      //   userId: session.user.id,
+      //   roomId: room.id,
+      // });
     };
-  }, [room.id, session.user.id, initialRoomData.id, queryClient, socket]);
+  }, [room.id, session.user.id, queryClient, socket]);
 
   const roomIsFull = room.participants.length === room.maxUsers;
+
+  const handleStartTest = () => {
+    socket?.emit("startGame", { room });
+  };
 
   return (
     <>
@@ -69,7 +73,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
             )}
           </span>
         </div>
-        <div className="flex h-full flex-col items-end">
+        <div className="flex h-full flex-col md:items-end">
           <div className="flex gap-2">
             <span className="text-foreground/60">Room ID</span>
             <span className="text-foreground">{room.id}</span>
@@ -120,8 +124,8 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
             <span>{room.isPublicRoom ? "Public" : "Private"}</span>
           </div>
         </div>
-        <div className="flex h-96 flex-col overflow-hidden rounded-md bg-foreground/5 sm:h-80 sm:flex-row">
-          <div className="flex w-full flex-row gap-2 border-background px-4 py-2 max-sm:overflow-x-auto max-sm:border-b-2 sm:w-48 sm:flex-col sm:overflow-y-auto sm:border-r-2">
+        <div className="flex flex-col overflow-hidden rounded-md bg-foreground/5 sm:h-80 sm:flex-row">
+          <div className="flex h-full w-full flex-row gap-2 border-background px-4 py-2 max-sm:overflow-x-auto max-sm:border-b-2 sm:w-48 sm:flex-col sm:overflow-y-auto sm:border-r-2">
             {room.participants?.map((participant) => (
               <div
                 key={participant.user.id}
@@ -141,7 +145,7 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
           </div>
           <RoomChat session={session} roomId={initialRoomData.id} />
         </div>
-        <div className="mt-4 flex">
+        <div className="mt-4 flex justify-between">
           <Button
             onClick={() => router.push("/lobby")}
             variant="destructive"
@@ -149,6 +153,11 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
           >
             Leave room
           </Button>
+          {session.user.id === room.creatorId && (
+            <Button onClick={handleStartTest} size="sm">
+              Start test
+            </Button>
+          )}
         </div>
       </div>
     </>
