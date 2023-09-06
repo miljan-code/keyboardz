@@ -7,11 +7,11 @@ import { Session } from "next-auth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { socket } from "@/lib/socket";
 import { cn } from "@/lib/utils";
 import { createRoomSchema } from "@/lib/validations/create-room-schema";
 import type { Room } from "@/db/schema";
 import { leaderboardCategories } from "@/config/leaderboard";
-import { useSocket } from "@/components/socket-provider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -68,7 +68,6 @@ export const CreateRoom = ({ session }: CreateRoomProps) => {
   );
 
   const { toast } = useToast();
-  const socket = useSocket();
 
   const { mutate, isLoading } = useMutation({
     mutationFn: async (values: CreateRoomFields) => {
@@ -84,7 +83,7 @@ export const CreateRoom = ({ session }: CreateRoomProps) => {
     },
     onSuccess: (room: Room) => {
       setIsOpen(false);
-      socket?.emit("userJoinRoom", {
+      socket.emit("userJoinRoom", {
         userId: session.user.id,
         roomId: room.id,
       });

@@ -3,9 +3,9 @@
 import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import type { Session } from "next-auth";
 
+import { socket } from "@/lib/socket";
 import { generateFallback } from "@/lib/utils";
 import { Icons } from "@/components/icons";
-import { useSocket } from "@/components/socket-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface TestRoomProps {
@@ -14,10 +14,8 @@ interface TestRoomProps {
 }
 
 export const TestRoom = ({ room, session }: TestRoomProps) => {
-  const socket = useSocket();
-
   const handleJoinRoom = () => {
-    socket?.emit("userJoinRoom", {
+    socket.emit("userJoinRoom", {
       userId: session.user.id,
       roomId: room.id,
     });

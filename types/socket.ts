@@ -29,7 +29,7 @@ export type MessagePayload = {
   roomId: Room["id"];
 };
 
-export type StartGamePayload = {
+export type GameStartedPayload = {
   text: string;
   roomId: string;
 };
@@ -53,7 +53,7 @@ export interface ServerToClientEvents {
   updateRoom: (payload: RoomIdPayload) => void;
   userEnteredRoom: (payload: RoomIdPayload) => void;
   newMessage: (payload: Message) => void;
-  startGame: (payload: StartGamePayload) => void;
+  gameStarted: (payload: GameStartedPayload) => void;
   updateResults: (payload: UpdateResultsPayload) => void;
 }
 
@@ -63,4 +63,5 @@ export interface ClientToServerEvents {
   sendMessage: (payload: MessagePayload) => void;
   startGame: (payload: RoomPayload) => void;
   submitResult: (payload: SubmitResultPayload) => void;
+  removeResult: (payload: UserJoinRoomPayload) => void;
 }

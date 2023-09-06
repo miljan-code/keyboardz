@@ -1,14 +1,25 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import Link from "next/link";
 import { useWpm } from "@/hooks/use-wpm";
 import { useQuery } from "@tanstack/react-query";
+import { useSetAtom } from "jotai";
 import { useSession } from "next-auth/react";
 
-import { generateFallback } from "@/lib/utils";
+import { socket } from "@/lib/socket";
+import { currentTextAtom } from "@/lib/store";
+import { cn, generateFallback } from "@/lib/utils";
 import type { MultiplayerScore, Room, User } from "@/db/schema";
-import { useSocket } from "@/components/socket-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import type { TestMode } from "@/types/test";
 
@@ -27,6 +38,8 @@ export const MultiplayerResults = ({
   testMode,
   roomId,
 }: MultiplayerResultsProps) => {
+  const setCurrentText = useSetAtom(currentTextAtom);
+
   const { data: results, refetch } = useQuery({
     queryKey: [`results-${roomId}`],
     queryFn: async () => {
@@ -38,12 +51,10 @@ export const MultiplayerResults = ({
   const { wpmStats } = useWpm({ text });
   const { data: session } = useSession();
 
-  const socket = useSocket();
-
   useEffect(() => {
     if (!session) return;
 
-    socket?.emit("submitResult", {
+    socket.emit("submitResult", {
       roomId,
       testMode: {
         mode: testMode.mode,
@@ -53,13 +64,28 @@ export const MultiplayerResults = ({
       user: session.user,
       wpmStats,
     });
+
+    setCurrentText("");
+
+    return () => {
+      socket.emit("removeResult", {
+        roomId,
+        userId: session?.user.id || "",
+      });
+    };
     // eslint-disable-next-line
   }, [socket, roomId, testMode.amount, testMode.mode, text]);
 
   // Catch results
   useEffect(() => {
-    socket?.on("updateResults", () => refetch());
-  }, [socket, refetch]);
+    const refetchResults = () => refetch();
+
+    socket.on("updateResults", refetchResults);
+
+    return () => {
+      socket.off("updateResults", refetchResults);
+    };
+  }, [refetch]);
 
   const sortedResults = useMemo(() => {
     const resultsArr = [...(results || [])];
@@ -67,46 +93,59 @@ export const MultiplayerResults = ({
   }, [results]);
 
   return (
-    <div className="flex w-full flex-col gap-4">
-      {sortedResults.map((result, index) => (
-        <div
-          key={result.user.id}
-          className="flex h-24 w-full items-center justify-between rounded-md bg-foreground/5"
-        >
-          <div className="flex h-full items-center gap-4">
-            <div className="flex h-full w-14 items-center justify-center border-r-2 border-background">
-              <span className="text-3xl font-medium">{index + 1}.</span>
-            </div>
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={result.user.image || ""} />
-              <AvatarFallback>
-                {generateFallback(result.user.name || "NN")}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-2xl font-medium">{result.user.name}</span>
-          </div>
-          <div className="flex h-full items-center [&>*]:flex [&>*]:h-full [&>*]:w-28 [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-1 [&>*]:border-l-2 [&>*]:border-background">
-            <div>
-              <span className="text-foreground/80">WPM</span>
-              <h3 className="text-5xl font-semibold text-primary">
+    <div className="scrollbar-sm w-full">
+      <Table>
+        <TableHeader>
+          <TableRow className="text-xs">
+            <TableHead>#</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead className="text-primary max-sm:text-right">
+              WPM
+            </TableHead>
+            <TableHead className="hidden sm:table-cell">Raw WPM</TableHead>
+            <TableHead className="hidden sm:table-cell">Accuracy</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sortedResults.map((result, index) => (
+            <TableRow
+              key={result.id}
+              className={cn({
+                "bg-primary/5": index % 2 === 0,
+              })}
+            >
+              <TableCell className="font-medium">{index + 1}</TableCell>
+              <TableCell className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={result.user.image || ""} />
+                  <AvatarFallback>
+                    {generateFallback(result.user.name || "")}
+                  </AvatarFallback>
+                </Avatar>
+                <Link href={`/profile/${result.user.id}`}>
+                  {result.user?.name}
+                </Link>
+              </TableCell>
+              <TableCell className="text-primary max-sm:text-right">
                 {result.wpm}
-              </h3>
-            </div>
-            <div>
-              <span className="text-foreground/80">Raw</span>
-              <h3 className="text-5xl font-semibold text-primary">
+              </TableCell>
+              <TableCell className="hidden sm:table-cell">
                 {result.rawWpm}
-              </h3>
-            </div>
-            <div>
-              <span className="text-foreground/80">Accuracy</span>
-              <h3 className="text-5xl font-semibold text-primary">
-                {result.accuracy}
-              </h3>
-            </div>
-          </div>
+              </TableCell>
+              <TableCell className="hidden sm:table-cell">
+                {result.accuracy}%
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      {!sortedResults.length && (
+        <div className="flex items-center justify-center py-4">
+          <span className="text-sm text-muted-foreground">
+            Waiting for results...
+          </span>
         </div>
-      ))}
+      )}
     </div>
   );
 };

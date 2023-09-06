@@ -3,8 +3,8 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import type { Session } from "next-auth";
 
+import { socket } from "@/lib/socket";
 import type { Room } from "@/db/schema";
-import { useSocket } from "@/components/socket-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -24,8 +24,6 @@ export const RoomChat = ({ session, roomId }: RoomChatProps) => {
 
   const messagesDivRef = useRef<HTMLDivElement>(null);
 
-  const socket = useSocket();
-
   useEffect(() => {
     if (messagesDivRef.current) {
       messagesDivRef.current.scrollTop = messagesDivRef.current.scrollHeight;
@@ -33,10 +31,16 @@ export const RoomChat = ({ session, roomId }: RoomChatProps) => {
   }, [messages]);
 
   useEffect(() => {
-    socket?.on("newMessage", (message) => {
+    const updateMessages = (message: Message) => {
       setMessages((prev) => [...prev, message]);
-    });
-  }, [socket]);
+    };
+
+    socket.on("newMessage", updateMessages);
+
+    return () => {
+      socket.off("newMessage", updateMessages);
+    };
+  }, []);
 
   const handleSendMessage = (e: FormEvent) => {
     e.preventDefault();
@@ -48,7 +52,7 @@ export const RoomChat = ({ session, roomId }: RoomChatProps) => {
       message: inputValue,
     };
 
-    socket?.emit("sendMessage", {
+    socket.emit("sendMessage", {
       ...message,
       roomId,
     });

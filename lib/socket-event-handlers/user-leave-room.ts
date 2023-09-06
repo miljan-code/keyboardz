@@ -27,18 +27,19 @@ export const handleUserLeaveRoom = async (
 
   const [room] = await db.select().from(rooms).where(eq(rooms.id, roomId));
 
-  // Check if host has left the room
-  if (room.creatorId === userId) {
-    await db.update(rooms).set({ creatorId: remainingParticipants[0].userId });
+  // Check if room is empty and inactive
+  let isDeleted = false;
+  if (!remainingParticipants.length && room.isActiveRoom) {
+    await db.delete(rooms).where(eq(rooms.id, roomId));
+    isDeleted = true;
   }
 
-  // Check if room is empty and inactive
-  if (!remainingParticipants.length && !room.isActiveRoom) {
-    await db.delete(rooms).where(eq(rooms.id, roomId));
-    socket.broadcast.emit("updateRoomList");
-    return;
+  // Check if host has left the room
+  if (room.creatorId === userId && !isDeleted) {
+    await db.update(rooms).set({ creatorId: remainingParticipants[0].userId });
   }
 
   socket.to(`room-${roomId}`).emit("updateRoom", { roomId });
   socket.broadcast.emit("updateRoomList");
+  socket.emit("updateRoomList");
 };

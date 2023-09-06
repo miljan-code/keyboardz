@@ -23,10 +23,7 @@ export default async function MultiplayerTestPage({
   };
 
   return (
-    <div className="grid h-full grid-flow-row grid-rows-[auto_1fr_auto] gap-8">
-      <div className="flex items-center justify-center">
-        Other players stats
-      </div>
+    <div className="grid h-full grid-flow-row grid-rows-[1fr_auto] gap-8">
       <div className="flex h-full items-center justify-center">
         <MutliplayerTest testMode={testMode} roomId={room.id} />
       </div>
