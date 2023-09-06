@@ -55,6 +55,6 @@ export const handleStartTest = async (
   await countdown();
 
   // Emit event
-  socket.to(`room-${room.id}`).emit("startGame", { text, roomId: room.id });
-  socket.emit("startGame", { text, roomId: room.id });
+  socket.to(`room-${room.id}`).emit("gameStarted", { text, roomId: room.id });
+  socket.emit("gameStarted", { text, roomId: room.id });
 };

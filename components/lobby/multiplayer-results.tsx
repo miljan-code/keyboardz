@@ -7,10 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import { useSession } from "next-auth/react";
 
+import { socket } from "@/lib/socket";
 import { currentTextAtom } from "@/lib/store";
 import { cn, generateFallback } from "@/lib/utils";
 import type { MultiplayerScore, Room, User } from "@/db/schema";
-import { useSocket } from "@/components/socket-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
@@ -51,12 +51,10 @@ export const MultiplayerResults = ({
   const { wpmStats } = useWpm({ text });
   const { data: session } = useSession();
 
-  const socket = useSocket();
-
   useEffect(() => {
     if (!session) return;
 
-    socket?.emit("submitResult", {
+    socket.emit("submitResult", {
       roomId,
       testMode: {
         mode: testMode.mode,
@@ -70,7 +68,7 @@ export const MultiplayerResults = ({
     setCurrentText("");
 
     return () => {
-      socket?.emit("removeResult", {
+      socket.emit("removeResult", {
         roomId,
         userId: session?.user.id || "",
       });
@@ -80,8 +78,14 @@ export const MultiplayerResults = ({
 
   // Catch results
   useEffect(() => {
-    socket?.on("updateResults", () => refetch());
-  }, [socket, refetch]);
+    const refetchResults = () => refetch();
+
+    socket.on("updateResults", refetchResults);
+
+    return () => {
+      socket.off("updateResults", refetchResults);
+    };
+  }, [refetch]);
 
   const sortedResults = useMemo(() => {
     const resultsArr = [...(results || [])];
