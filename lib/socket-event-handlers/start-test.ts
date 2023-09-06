@@ -33,19 +33,26 @@ export const handleStartTest = async (
   const text = generateTextByMode(testMode);
 
   // start counter
-  let time = 5;
-  const counterInterval = setInterval(() => {
-    if (time === 1) clearInterval(counterInterval);
-    socket.to(`room-${room.id}`).emit("newMessage", {
-      username: `Game starts in ${time}`,
-      message: "",
+  async function countdown(s: number = 5) {
+    return await new Promise<void>((resolve) => {
+      const interval = setInterval(() => {
+        if (s === 1) {
+          resolve();
+          clearInterval(interval);
+        }
+        socket.to(`room-${room.id}`).emit("newMessage", {
+          username: `Game starts in ${s}`,
+          message: "",
+        });
+        socket.emit("newMessage", {
+          username: `Game starts in ${s}`,
+          message: "",
+        });
+        s--;
+      }, 1000);
     });
-    socket.emit("newMessage", {
-      username: `Game starts in ${time}`,
-      message: "",
-    });
-    time--;
-  }, 1000);
+  }
+  await countdown();
 
   // Emit event
   socket.to(`room-${room.id}`).emit("startGame", { text, roomId: room.id });

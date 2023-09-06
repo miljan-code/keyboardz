@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { RoomWithParticipants } from "@/app/(multiplayer)/lobby/page";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -19,6 +19,8 @@ interface RoomProps {
 }
 
 export const Room = ({ initialRoomData, session }: RoomProps) => {
+  const [isStarted, setIsStarted] = useState(false);
+
   const queryClient = useQueryClient();
   const router = useRouter();
   const socket = useSocket();
@@ -40,16 +42,18 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
     });
 
     return () => {
-      // socket?.emit("userLeaveRoom", {
-      //   userId: session.user.id,
-      //   roomId: room.id,
-      // });
+      if (isStarted) return;
+      socket?.emit("userLeaveRoom", {
+        userId: session.user.id,
+        roomId: room.id,
+      });
     };
-  }, [room.id, session.user.id, queryClient, socket]);
+  }, [room.id, session.user.id, queryClient, socket, isStarted]);
 
   const roomIsFull = room.participants.length === room.maxUsers;
 
   const handleStartTest = () => {
+    setIsStarted(true);
     socket?.emit("startGame", { room });
   };
 
