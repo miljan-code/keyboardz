@@ -42,6 +42,8 @@ export const handleUserJoinRoom = async (
       title: "Room is closed",
       description: "The test has already started.",
     });
+
+    return;
   }
 
   if (room.participants.length === room.maxUsers) {

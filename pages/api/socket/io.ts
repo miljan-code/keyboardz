@@ -1,6 +1,7 @@
 import { NextApiRequest } from "next";
 import { Server as ServerIO, type Socket } from "socket.io";
 
+import { handleRemoveResult } from "@/lib/socket-event-handlers/remove-result";
 import { handleSendMessage } from "@/lib/socket-event-handlers/send-message";
 import { handleStartTest } from "@/lib/socket-event-handlers/start-test";
 import { handleSubmitResult } from "@/lib/socket-event-handlers/submit-result";
@@ -52,6 +53,10 @@ const io = async (req: NextApiRequest, res: NextApiResponseServerIO) => {
 
       socket.on("submitResult", (payload) => {
         handleSubmitResult(socket, payload);
+      });
+
+      socket.on("removeResult", (payload) => {
+        handleRemoveResult(payload);
       });
     },
   );

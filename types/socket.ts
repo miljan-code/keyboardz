@@ -63,4 +63,5 @@ export interface ClientToServerEvents {
   sendMessage: (payload: MessagePayload) => void;
   startGame: (payload: RoomPayload) => void;
   submitResult: (payload: SubmitResultPayload) => void;
+  removeResult: (payload: UserJoinRoomPayload) => void;
 }

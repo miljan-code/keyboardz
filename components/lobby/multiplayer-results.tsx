@@ -68,6 +68,13 @@ export const MultiplayerResults = ({
     });
 
     setCurrentText("");
+
+    return () => {
+      socket?.emit("removeResult", {
+        roomId,
+        userId: session?.user.id || "",
+      });
+    };
     // eslint-disable-next-line
   }, [socket, roomId, testMode.amount, testMode.mode, text]);
 
