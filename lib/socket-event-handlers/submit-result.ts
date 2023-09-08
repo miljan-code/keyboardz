@@ -49,12 +49,6 @@ export const handleSubmitResult = async (
     rawWpm: wpmStats.rawWpm,
   });
 
-  socket.to(`room-${roomId}`).emit("updateResults", {
-    user,
-    wpmStats,
-  });
-  socket.emit("updateResults", {
-    user,
-    wpmStats,
-  });
+  socket.to(`room-${roomId}`).emit("updateResults");
+  socket.emit("updateResults");
 };

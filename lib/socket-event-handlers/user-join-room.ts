@@ -91,6 +91,10 @@ export const handleUserJoinRoom = async (
   socket.to(`room-${roomId}`).emit("updateRoom", {
     roomId,
   });
+  socket.to(`room-${roomId}`).emit("newMessage", {
+    username: user.name || "Unknown",
+    message: "has joined the room",
+  });
   socket.emit("userEnteredRoom", {
     roomId,
   });

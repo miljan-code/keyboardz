@@ -7,14 +7,14 @@ import { participants, rooms } from "@/db/schema";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
-  UserJoinRoomPayload,
+  UserLeaveRoomPayload,
 } from "@/types/socket";
 
 export const handleUserLeaveRoom = async (
   socket: Socket<ClientToServerEvents, ServerToClientEvents>,
-  payload: UserJoinRoomPayload,
+  payload: UserLeaveRoomPayload,
 ) => {
-  const { roomId, userId } = payload;
+  const { roomId, userId, username } = payload;
 
   // Delete participant
   await db.delete(participants).where(eq(participants.userId, userId));
@@ -42,4 +42,8 @@ export const handleUserLeaveRoom = async (
   socket.to(`room-${roomId}`).emit("updateRoom", { roomId });
   socket.broadcast.emit("updateRoomList");
   socket.emit("updateRoomList");
+  socket.to(`room-${roomId}`).emit("newMessage", {
+    username: username || "Unknown",
+    message: "has left the room",
+  });
 };

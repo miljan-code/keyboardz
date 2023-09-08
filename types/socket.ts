@@ -10,6 +10,10 @@ export type UserJoinRoomPayload = {
   roomId: Room["id"];
 };
 
+export type UserLeaveRoomPayload = UserJoinRoomPayload & {
+  username: Session["user"]["name"];
+};
+
 export type NotificationPayload = {
   title: string;
   description: string;
@@ -54,12 +58,12 @@ export interface ServerToClientEvents {
   userEnteredRoom: (payload: RoomIdPayload) => void;
   newMessage: (payload: Message) => void;
   gameStarted: (payload: GameStartedPayload) => void;
-  updateResults: (payload: UpdateResultsPayload) => void;
+  updateResults: () => void;
 }
 
 export interface ClientToServerEvents {
   userJoinRoom: (payload: UserJoinRoomPayload) => void;
-  userLeaveRoom: (payload: UserJoinRoomPayload) => void;
+  userLeaveRoom: (payload: UserLeaveRoomPayload) => void;
   sendMessage: (payload: MessagePayload) => void;
   startGame: (payload: RoomPayload) => void;
   submitResult: (payload: SubmitResultPayload) => void;

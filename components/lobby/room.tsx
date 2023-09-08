@@ -46,10 +46,11 @@ export const Room = ({ initialRoomData, session }: RoomProps) => {
       socket.off("updateRoom", updateRoom);
       socket.emit("userLeaveRoom", {
         userId: session.user.id,
+        username: session.user.name,
         roomId: room.id,
       });
     };
-  }, [room.id, session.user.id, queryClient]);
+  }, [room.id, session.user.id, session.user.name, queryClient]);
 
   const roomIsFull = room.participants.length === room.maxUsers;
 
